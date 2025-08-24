@@ -9,6 +9,7 @@ import { errorHandler } from "./middlewares/errorHandler.middleware";
 import { BadRequestException } from "./utils/app-error";
 import { asyncHandler } from "./middlewares/asyncHandler.middleware";
 import { ErrorCodeEnum } from "./enums/error-code.enum";
+import "./config/passport.config";
 import passport from "passport";
 import authRoutes from "./routes/auth.routes";
 
