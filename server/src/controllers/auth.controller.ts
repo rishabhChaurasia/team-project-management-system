@@ -8,14 +8,7 @@ import passport from "passport";
 
 export const googleLoginCallback = asyncHandler(
   async (req: Request, res: Response) => {
-    // Check if user exists first
-    if (!req.user) {
-      return res.redirect(
-        `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure`
-      );
-    }
-
-    const currentWorkspace = req.user.currentWorkspace;
+    const currentWorkspace = req.user?.currentWorkspace;
 
     if (!currentWorkspace) {
       return res.redirect(
@@ -24,7 +17,7 @@ export const googleLoginCallback = asyncHandler(
     }
 
     return res.redirect(
-      `${config.FRONTEND_ORIGIN}/workspace/${currentWorkspace}?status=success`
+      `${config.FRONTEND_ORIGIN}/workspace/${currentWorkspace}`
     );
   }
 );
@@ -90,6 +83,6 @@ export const logOutController = asyncHandler(
     req.session = null;
     return res
       .status(HTTPSTATUS.OK)
-      .json({ message: "Logged out successfully!" });
+      .json({ message: "Logged out sucessfully!" });
   }
 );
