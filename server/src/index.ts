@@ -15,6 +15,7 @@ import authRoutes from "./routes/auth.routes";
 import isAuthenticated from "./middlewares/isAuthenticated.middleware";
 import userRoutes from "./routes/user.routes";
 import workspaceRoutes from "./routes/workspace.routes";
+import memberRoutes from "./routes/member.routes";
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.get(
 app.use(`${BASE_PATH}/auth`, authRoutes);
 app.use(`${BASE_PATH}/user`, isAuthenticated, userRoutes);
 app.use(`${BASE_PATH}/workspace`, isAuthenticated, workspaceRoutes);
+app.use(`${BASE_PATH}/member`, isAuthenticated, memberRoutes);
 
 app.use(errorHandler);
 
