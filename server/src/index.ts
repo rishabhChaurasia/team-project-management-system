@@ -12,6 +12,8 @@ import { ErrorCodeEnum } from "./enums/error-code.enum";
 import "./config/passport.config";
 import passport from "passport";
 import authRoutes from "./routes/auth.routes";
+import isAuthenticated from "./middlewares/isAuthenticated.middleware";
+import userRoutes from "./routes/user.routes";
 
 const app = express();
 
@@ -58,6 +60,7 @@ app.get(
 
 // routes
 app.use(`${BASE_PATH}/auth`, authRoutes);
+app.use(`${BASE_PATH}/user`, isAuthenticated, userRoutes);
 
 app.use(errorHandler);
 
@@ -66,4 +69,3 @@ app.listen(config.PORT, async () => {
   await mongoDB(config.MONGO_URI as string);
   console.log(`Server is running on ${config.PORT}... in ${config.NODE_ENV}`);
 });
- 
