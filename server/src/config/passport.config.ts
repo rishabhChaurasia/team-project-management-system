@@ -4,11 +4,8 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as LocalStrategy } from "passport-local";
 import { config } from "./app.config";
 import { NotFoundException } from "../utils/app-error";
+import { loginOrCreateAccountService, verifyUserService } from "../services/auth.service";
 import { ProviderEnum } from "../enums/account-provider.enum";
-import {
-  loginOrCreateAccountService,
-  verifyUserService,
-} from "../services/auth.service";
 
 passport.use(
   new GoogleStrategy(
@@ -22,12 +19,10 @@ passport.use(
     async (req: Request, accessToken, refreshToken, profile, done) => {
       try {
         const { email, sub: googleId, picture } = profile._json;
-
         console.log(profile, "profile");
         console.log(googleId, "googleId");
-
         if (!googleId) {
-          throw new NotFoundException("Google Id (sub) is missing!");
+          throw new NotFoundException("Google ID (sub) is missing");
         }
 
         const { user } = await loginOrCreateAccountService({
