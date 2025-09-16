@@ -9,3 +9,13 @@ export interface authUserType {
   updatedAt: Date | null;
   currentWorkspace: string | null;
 }
+
+export interface workspacesType {
+  _id: string;
+  name: string;
+  description: string;
+  owner: string;
+  inviteCode: string;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
+}
