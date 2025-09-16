@@ -19,3 +19,23 @@ export interface workspacesType {
   createdAt: Date | string;
   updatedAt?: Date | string;
 }
+
+export interface projectsType {
+  _id: string;
+  name: string;
+  description: string;
+  emoji: string;
+  workspace: string;
+  createdBy: string;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
+}
+
+export interface paginationType {
+  totalCount: number;
+  pageSize: number;
+  pageNumber: number;
+  totalPages: number;
+  skip: number;
+  limit: number;
+}
