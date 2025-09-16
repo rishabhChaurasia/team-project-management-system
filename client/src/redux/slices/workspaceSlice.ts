@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { workspacesType } from "../../types";
-import { workspaceApi } from "../rtkQueryApi/workspaceApi";
+import { workspaceApi } from "../rtk-query/workspaceApi";
 
 interface workspaceStateType {
   isLoading: boolean;

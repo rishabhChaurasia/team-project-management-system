@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { authUserType } from "../../types";
-import { authApi } from "../rtkQueryApi/authApi";
+import { authApi } from "../rtk-query/authApi";
 
 interface authUserState {
   authUser: authUserType | null;

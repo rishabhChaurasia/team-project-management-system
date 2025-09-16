@@ -1,8 +1,8 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import authReducer from "./slices/authSlice";
 import workspaceReducer from "./slices/workspaceSlice";
-import { authApi } from "./rtkQueryApi/authApi";
-import { workspaceApi } from "./rtkQueryApi/workspaceApi";
+import { authApi } from "./rtk-query/authApi";
+import { workspaceApi } from "./rtk-query/workspaceApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 const rootReducer = combineReducers({
