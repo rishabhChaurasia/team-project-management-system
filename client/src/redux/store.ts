@@ -3,10 +3,12 @@ import authReducer from "./slices/authSlice";
 import workspaceReducer from "./slices/workspaceSlice";
 import memberReducer from "./slices/memberSlice";
 import projectReducer from "./slices/projectSlice";
+import taskReducer from "./slices/taskSlice";
 import { authApi } from "./rtk-query/authApi";
 import { workspaceApi } from "./rtk-query/workspaceApi";
 import { memberApi } from "./rtk-query/memberApi";
 import { projectApi } from "./rtk-query/projectApi";
+import { taskApi } from "./rtk-query/taskApi";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
 const rootReducer = combineReducers({
@@ -14,10 +16,12 @@ const rootReducer = combineReducers({
   workspace: workspaceReducer,
   member: memberReducer,
   project: projectReducer,
+  task: taskReducer,
   [authApi.reducerPath]: authApi.reducer,
   [workspaceApi.reducerPath]: workspaceApi.reducer,
   [memberApi.reducerPath]: memberApi.reducer,
   [projectApi.reducerPath]: projectApi.reducer,
+  [taskApi.reducerPath]: taskApi.reducer,
 });
 
 export const store = configureStore({
@@ -27,7 +31,8 @@ export const store = configureStore({
       authApi.middleware,
       workspaceApi.middleware,
       memberApi.middleware,
-      projectApi.middleware
+      projectApi.middleware,
+      taskApi.middleware
     ),
 });
 
