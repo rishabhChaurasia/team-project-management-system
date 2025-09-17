@@ -1,5 +1,12 @@
+import { Route, Routes } from "react-router-dom";
+import Login from "./pages/Login";
+
 const App = () => {
-  return <h1 className="text-3xl font-bold">Hello world!</h1>;
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+    </Routes>
+  );
 };
 
 export default App;
