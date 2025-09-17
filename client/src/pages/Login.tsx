@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -16,15 +17,48 @@ import {
 } from "@/components/ui/form";
 import GoogleOauthButton from "@/components/ui/google-oauth-button";
 import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Loader } from "lucide-react";
+import { toast } from "sonner";
+import { useLoginUserMutation } from "@/redux/rtk-query/authApi";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loginUser, { isLoading }] = useLoginUserMutation();
 
-//   const formSchema = z.object({
-//     email
-//   })
+  const formSchema = z.object({
+    email: z
+      .email({ message: "Please enter a valid email address" }) // ✅ new way
+      .trim(),
+    password: z
+      .string()
+      .trim()
+      .min(6, { message: "Password must be at least 6 characters" }),
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    mode: "onSubmit",
+  });
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      await loginUser(values).unwrap();
+      toast.success("Login Successful!");
+      form.reset();
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Login failed!");
+    }
+  };
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
@@ -38,8 +72,8 @@ const Login = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Form>
-                <form>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)}>
                   <div className="grid gap-6">
                     <div className="flex flex-col gap-4">
                       <GoogleOauthButton label="Login" />
@@ -52,6 +86,7 @@ const Login = () => {
                     <div className="grid gap-3">
                       <div className="grid gap-2">
                         <FormField
+                          control={form.control}
                           name="email"
                           render={({ field }) => (
                             <FormItem>
@@ -60,7 +95,7 @@ const Login = () => {
                               </FormLabel>
                               <FormControl>
                                 <Input
-                                  placeholder="m@example.com"
+                                  placeholder="example@gmail.com"
                                   className="!h-[48px]"
                                   {...field}
                                 />
@@ -73,6 +108,7 @@ const Login = () => {
                       </div>
                       <div className="grid gap-2">
                         <FormField
+                          control={form.control}
                           name="password"
                           render={({ field }) => (
                             <FormItem>
@@ -88,11 +124,29 @@ const Login = () => {
                                 </a>
                               </div>
                               <FormControl>
-                                <Input
-                                  type="password"
-                                  className="!h-[48px]"
-                                  {...field}
-                                />
+                                <div className="relative">
+                                  <Input
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="password"
+                                    className="!h-[48px]"
+                                    {...field}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant={"ghost"}
+                                    size={"sm"}
+                                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                    onClick={() =>
+                                      setShowPassword((prev) => !prev)
+                                    }
+                                  >
+                                    {showPassword ? (
+                                      <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                      <Eye className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </div>
                               </FormControl>
 
                               <FormMessage />
@@ -100,8 +154,19 @@ const Login = () => {
                           )}
                         />
                       </div>
-                      <Button type="submit" className="w-full">
-                        Login
+                      <Button
+                        disabled={isLoading}
+                        type="submit"
+                        className="w-full"
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader className="animate-spin mr-2 h-4 w-4" />
+                            Logging in...
+                          </>
+                        ) : (
+                          "Login"
+                        )}
                       </Button>
                     </div>
                     <div className="text-center text-sm">
