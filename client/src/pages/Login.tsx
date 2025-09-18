@@ -77,7 +77,7 @@ const Login = () => {
                   <form onSubmit={form.handleSubmit(onSubmit)}>
                     <div className="grid gap-6">
                       <div className="flex flex-col gap-4">
-                        <GoogleOauthButton label="Login" />
+                        <GoogleOauthButton label="Sign In" />
                       </div>
                       <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
                         <span className="relative z-10 bg-background px-2 text-muted-foreground">
@@ -160,14 +160,8 @@ const Login = () => {
                           type="submit"
                           className="w-full h-[40px] cursor-pointer"
                         >
-                          {isLoading ? (
-                            <>
-                              <Loader className="animate-spin mr-2 h-4 w-4" />
-                              Logging in...
-                            </>
-                          ) : (
-                            "Login"
-                          )}
+                          {isLoading && <Loader className="animate-spin" />}
+                          Login
                         </Button>
                       </div>
                       <div className="text-center text-sm">
