@@ -2,7 +2,13 @@ import { Suspense } from "react";
 import { Route, Routes } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { Progress } from "./components/ui/progress";
-import { ForgotPassword, Login, Register, ResetPassword } from "./pages";
+import {
+  ForgotPassword,
+  GoogleOauthFailure,
+  Login,
+  Register,
+  ResetPassword,
+} from "./pages";
 
 const App = () => {
   return (
@@ -23,6 +29,7 @@ const App = () => {
         <Route path="/sign-up" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/google/oauth/callback" element={<GoogleOauthFailure />} />
       </Routes>
       <Toaster />
     </Suspense>
