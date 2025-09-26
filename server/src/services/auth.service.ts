@@ -11,6 +11,7 @@ import {
 } from "../utils/app-error";
 import MemberModel from "../models/member.model";
 import { ProviderEnum } from "../enums/account-provider.enum";
+import { sendOTPEmail } from "./email.service";
 
 interface LoginOrCreateAccountServiceType {
   provider: string;
@@ -195,4 +196,42 @@ export const verifyUserService = async ({
   }
 
   return user.omitPassword();
+};
+
+export const forgotPasswordService = async (email: string) => {
+  const user = await UserModel.findOne({ email });
+
+  if (!user) {
+    throw new NotFoundException("User not found");
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expires = new Date(Date.now() + 10 * 60 * 1000);
+
+  user.resetPasswordOTP = otp;
+  user.resetPasswordExpires = expires;
+  await user.save();
+
+  await sendOTPEmail(email, otp, user.name);
+};
+
+export const resetPasswordService = async (
+  email: string,
+  otp: string,
+  newPassword: string
+) => {
+  const user = await UserModel.findOne({
+    email,
+    resetPasswordOTP: otp,
+    resetPasswordExpires: { $gt: new Date() },
+  });
+
+  if (!user) {
+    throw new BadRequestException("Invalid or expired OTP");
+  }
+
+  user.password = newPassword;
+  user.resetPasswordOTP = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
 };

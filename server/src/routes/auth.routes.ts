@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { config } from "../config/app.config";
 import {
+  forgotPasswordController,
   googleLoginCallback,
   loginController,
   logOutController,
   registerUserController,
+  resetPasswordController,
 } from "../controllers/auth.controller";
 import passport from "passport";
 
@@ -15,6 +17,9 @@ authRoutes.post("/register", registerUserController);
 authRoutes.post("/login", loginController);
 
 authRoutes.post("/logout", logOutController);
+
+authRoutes.post("/forgot-password", forgotPasswordController);
+authRoutes.post("/reset-password", resetPasswordController);
 
 authRoutes.get(
   "/google",

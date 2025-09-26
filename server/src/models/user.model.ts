@@ -11,6 +11,8 @@ export interface UserDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
   currentWorkspace: mongoose.Types.ObjectId | null;
+  resetPasswordOTP?: string;
+  resetPasswordExpires?: Date;
   comparePassword(value: string): Promise<boolean>;
   omitPassword(): Omit<UserDocument, "password">;
 }
@@ -48,6 +50,14 @@ const userSchema = new Schema<UserDocument>(
     lastLogin: {
       type: Date,
       default: null,
+    },
+    resetPasswordOTP: {
+      type: String,
+      select: false,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      select: false,
     },
   },
   { timestamps: true }

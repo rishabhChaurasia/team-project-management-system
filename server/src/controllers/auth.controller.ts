@@ -1,8 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler.middleware";
 import { config } from "../config/app.config";
-import { registerSchema } from "../validation/auth.validation";
-import { registerUserService } from "../services/auth.service";
+import {
+  forgotPasswordSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from "../validation/auth.validation";
+import {
+  forgotPasswordService,
+  registerUserService,
+  resetPasswordService,
+} from "../services/auth.service";
 import { HTTPSTATUS } from "../config/http.config";
 import passport from "passport";
 
@@ -92,6 +100,30 @@ export const logOutController = asyncHandler(
           .status(HTTPSTATUS.OK)
           .json({ message: "Logged out sucessfully!" });
       });
+    });
+  }
+);
+
+export const forgotPasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email } = forgotPasswordSchema.parse(req.body);
+
+    await forgotPasswordService(email);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "OTP sent to your email!",
+    });
+  }
+);
+
+export const resetPasswordController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { email, otp, newPassword } = resetPasswordSchema.parse(req.body);
+
+    await resetPasswordService(email, otp, newPassword);
+
+    return res.status(HTTPSTATUS.OK).json({
+      message: "Password reset successfully!",
     });
   }
 );
