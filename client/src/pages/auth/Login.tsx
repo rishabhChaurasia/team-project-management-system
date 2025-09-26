@@ -117,12 +117,12 @@ const Login = () => {
                                   <FormLabel className="dark:text-[#f1f7feb5] text-sm">
                                     Password
                                   </FormLabel>
-                                  <a
-                                    href="#"
+                                  <Link
+                                    to={"/forgot-password"}
                                     className="ml-auto text-sm underline-offset-4 hover:underline"
                                   >
                                     Forgot your password?
-                                  </a>
+                                  </Link>
                                 </div>
                                 <FormControl>
                                   <div className="relative">

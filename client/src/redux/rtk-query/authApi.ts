@@ -9,6 +9,7 @@ export const authApi = createApi({
     credentials: "include",
   }),
   tagTypes: ["Auth"],
+  keepUnusedDataFor: 300, // 5 minutes cache
   endpoints: (builder) => ({
     getCurrentUser: builder.query({
       query: () => ({
@@ -16,6 +17,7 @@ export const authApi = createApi({
         method: "GET",
       }),
       providesTags: ["Auth"],
+      keepUnusedDataFor: 600, // 10 minutes for user data
     }),
     registerUser: builder.mutation({
       query: (user) => ({
@@ -23,6 +25,7 @@ export const authApi = createApi({
         method: "POST",
         body: user,
       }),
+      invalidatesTags: ["Auth"],
     }),
     loginUser: builder.mutation({
       query: (user) => ({
@@ -39,6 +42,21 @@ export const authApi = createApi({
       }),
       invalidatesTags: ["Auth"],
     }),
+    forgotPassword: builder.mutation({
+      query: (email) => ({
+        url: "/auth/forgot-password",
+        method: "POST",
+        body: email,
+      }),
+    }),
+    resetPassword: builder.mutation({
+      query: (data) => ({
+        url: "/auth/reset-password",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
   }),
 });
 
@@ -47,4 +65,6 @@ export const {
   useRegisterUserMutation,
   useLoginUserMutation,
   useLogoutUserMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
 } = authApi;
