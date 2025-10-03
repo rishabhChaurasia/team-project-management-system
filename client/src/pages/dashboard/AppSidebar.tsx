@@ -300,10 +300,10 @@ const AppSidebar = () => {
                         asChild
                         className="hover:bg-sidebar-accent/50 transition-colors"
                       >
-                        <a href={item.url}>
+                        <Link to={item.url}>
                           <Icon size={20} />
                           {item.title}
-                        </a>
+                        </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
