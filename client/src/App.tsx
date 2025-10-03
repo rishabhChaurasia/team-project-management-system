@@ -6,9 +6,15 @@ import {
   ForgotPassword,
   GoogleOauthFailure,
   Login,
+  Members,
+  ProjectDetails,
   Register,
   ResetPassword,
+  Settings,
+  Tasks,
+  Workspace,
 } from "./pages";
+import DashboardLayout from "./layout/DashboardLayout";
 
 const App = () => {
   return (
@@ -30,6 +36,20 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/google/oauth/callback" element={<GoogleOauthFailure />} />
+
+        <Route element={<DashboardLayout />}>
+          <Route path="/workspace/:workspaceId" element={<Workspace />} />
+          <Route path="/workspace/:workspaceId/tasks" element={<Tasks />} />
+          <Route path="/workspace/:workspaceId/members" element={<Members />} />
+          <Route
+            path="/workspace/:workspaceId/settings"
+            element={<Settings />}
+          />
+          <Route
+            path="/workspace/:workspaceId/project/:projectId"
+            element={<ProjectDetails />}
+          />
+        </Route>
       </Routes>
       <Toaster />
     </Suspense>

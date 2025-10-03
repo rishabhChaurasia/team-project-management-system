@@ -9,7 +9,7 @@ export const authApi = createApi({
     credentials: "include",
   }),
   tagTypes: ["Auth"],
-  keepUnusedDataFor: 300, // 5 minutes cache
+  keepUnusedDataFor: 900, // 5 minutes cache
   endpoints: (builder) => ({
     getCurrentUser: builder.query({
       query: () => ({
@@ -17,7 +17,7 @@ export const authApi = createApi({
         method: "GET",
       }),
       providesTags: ["Auth"],
-      keepUnusedDataFor: 600, // 10 minutes for user data
+      keepUnusedDataFor: 1800, // 10 minutes for user data
     }),
     registerUser: builder.mutation({
       query: (user) => ({
