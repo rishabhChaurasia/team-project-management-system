@@ -46,6 +46,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import CreateWorkspaceDialog from "./workspace/CreateWorkspaceDialog";
+import CreateProjectDialog from "./project/CreateProjectDialog";
+import { motion } from "motion/react";
 
 type ItemType = {
   title: string;
@@ -56,6 +59,8 @@ type ItemType = {
 const AppSidebar = () => {
   const { workspaceId } = useParams();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+  const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
+  const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
 
   // Main navigation items for workspace-level features
   const items: ItemType[] = [
@@ -86,7 +91,14 @@ const AppSidebar = () => {
       <Sidebar>
         {/* App Header - Brand name and logo */}
         <SidebarHeader>
-          <h2 className="text-xl font-bold px-4 py-2">Team Flow</h2>
+          <motion.h2 
+            className="text-xl font-bold px-4 py-2"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            Team Flow
+          </motion.h2>
         </SidebarHeader>
         <SidebarContent>
           {/* Workspace Switcher Section - Allows users to switch between workspaces */}
@@ -98,6 +110,7 @@ const AppSidebar = () => {
                 size="icon"
                 className="h-5 w-5 rounded-full border hover:bg-accent"
                 title="Create workspace"
+                onClick={() => setIsCreateWorkspaceOpen(true)}
               >
                 <Plus className="size-3.5" />
               </Button>
@@ -146,7 +159,10 @@ const AppSidebar = () => {
                       <span className="flex-1">Personal Workspace</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="gap-2 p-2 cursor-pointer hover:bg-accent">
+                    <DropdownMenuItem 
+                      className="gap-2 p-2 cursor-pointer hover:bg-accent"
+                      onClick={() => setIsCreateWorkspaceOpen(true)}
+                    >
                       <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                         <Plus className="size-4" />
                       </div>
@@ -169,6 +185,7 @@ const AppSidebar = () => {
                 size="icon"
                 className="h-5 w-5 rounded-full border hover:bg-accent transition-colors"
                 title="Create project"
+                onClick={() => setIsCreateProjectOpen(true)}
               >
                 <Plus className="size-3.5" />
               </Button>
@@ -292,20 +309,27 @@ const AppSidebar = () => {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {items.map((item) => {
+                {items.map((item, index) => {
                   const Icon = item.icon;
                   return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        className="hover:bg-sidebar-accent/50 transition-colors"
-                      >
-                        <Link to={item.url}>
-                          <Icon size={20} />
-                          {item.title}
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    <motion.div
+                      key={item.title}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
+                    >
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          asChild
+                          className="hover:bg-sidebar-accent/50 transition-colors"
+                        >
+                          <Link to={item.url}>
+                            <Icon size={20} />
+                            {item.title}
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </motion.div>
                   );
                 })}
               </SidebarMenu>
@@ -315,7 +339,12 @@ const AppSidebar = () => {
 
         {/* User Profile Section - Shows current user info and logout option */}
         <SidebarFooter>
-          <div className="flex items-center gap-3 p-4">
+          <motion.div 
+            className="flex items-center gap-3 p-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.4 }}
+          >
             <Avatar>
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
@@ -344,7 +373,7 @@ const AppSidebar = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
+          </motion.div>
         </SidebarFooter>
       </Sidebar>
 
@@ -383,6 +412,18 @@ const AppSidebar = () => {
           </Card>
         </DialogContent>
       </Dialog>
+
+      {/* Create Workspace Dialog */}
+      <CreateWorkspaceDialog 
+        isOpen={isCreateWorkspaceOpen} 
+        onClose={() => setIsCreateWorkspaceOpen(false)} 
+      />
+
+      {/* Create Project Dialog */}
+      <CreateProjectDialog 
+        isOpen={isCreateProjectOpen} 
+        onClose={() => setIsCreateProjectOpen(false)} 
+      />
     </>
   );
 };
