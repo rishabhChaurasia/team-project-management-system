@@ -174,34 +174,22 @@ const RecentTasks = () => {
               {/* Mobile: Status, Priority, and Assignee in row */}
               <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-2">
                 {/* Task Status */}
-                <motion.div 
-                  className="text-xs sm:text-sm font-medium"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                <Badge
+                  variant="outline"
+                  className={`flex w-auto p-1 px-2 sm:px-3 gap-1 sm:gap-2 font-medium shadow-sm capitalize text-xs sm:text-sm ${getStatusColor(task.status)}`}
                 >
-                  <Badge
-                    variant="outline"
-                    className={`flex w-auto p-1 px-2 sm:px-3 gap-1 sm:gap-2 font-medium shadow-sm capitalize text-xs sm:text-sm ${getStatusColor(task.status)}`}
-                  >
-                    {getStatusIcon(task.status)}
-                    <span>{transformStatusEnum(task.status)}</span>
-                  </Badge>
-                </motion.div>
+                  {getStatusIcon(task.status)}
+                  <span>{transformStatusEnum(task.status)}</span>
+                </Badge>
 
                 {/* Task Priority */}
-                <motion.div 
-                  className="text-xs sm:text-sm"
-                  whileHover={{ scale: 1.05 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                <Badge
+                  variant="outline"
+                  className={`flex w-auto p-1 px-2 sm:px-3 gap-1 sm:gap-2 font-medium shadow-sm capitalize text-xs sm:text-sm ${getPriorityColor(task.priority)}`}
                 >
-                  <Badge
-                    variant="outline"
-                    className={`flex w-auto p-1 px-2 sm:px-3 gap-1 sm:gap-2 font-medium shadow-sm capitalize text-xs sm:text-sm ${getPriorityColor(task.priority)}`}
-                  >
-                    {getPriorityIcon(task.priority)}
-                    <span>{transformStatusEnum(task.priority)}</span>
-                  </Badge>
-                </motion.div>
+                  {getPriorityIcon(task.priority)}
+                  <span>{transformStatusEnum(task.priority)}</span>
+                </Badge>
 
                 {/* Assignee */}
                 <div className="flex items-center">

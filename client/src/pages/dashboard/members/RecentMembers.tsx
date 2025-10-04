@@ -158,20 +158,15 @@ const RecentMembers = () => {
                     {member.userId.name}
                   </p>
                   <div className="mt-1">
-                    <motion.div
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
+                    <Badge
+                      variant="outline"
+                      className={`flex w-fit items-center gap-1 text-xs font-medium ${getRoleColor(
+                        member.role.name
+                      )}`}
                     >
-                      <Badge
-                        variant="outline"
-                        className={`flex w-fit items-center gap-1 text-xs font-medium ${getRoleColor(
-                          member.role.name
-                        )}`}
-                      >
-                        <User className="w-3 h-3" />
-                        {member.role.name}
-                      </Badge>
-                    </motion.div>
+                      <User className="w-3 h-3" />
+                      {member.role.name}
+                    </Badge>
                   </div>
                 </div>
               </div>
