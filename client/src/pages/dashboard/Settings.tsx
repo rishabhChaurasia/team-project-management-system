@@ -24,7 +24,11 @@ const Settings = () => {
 
           <div className="flex flex-col space-y-6 sm:space-y-8">
             <div className="w-full">
-              <EditWorkspaceForm />
+              <EditWorkspaceForm
+                workspaceId={workspaceId!}
+                workspace={workspaceData?.workspace}
+                isLoading={isLoading}
+              />
             </div>
             <div className="w-full">
               <DeleteWorkspaceCard />
