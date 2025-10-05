@@ -20,9 +20,18 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useState, useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Building2, Loader } from "lucide-react";
 import { motion } from "motion/react";
+import { useCreateWorkspaceMutation } from "@/redux/rtk-query/workspaceApi";
+import { toast } from "sonner";
+
+const formSchema = z.object({
+  name: z.string().trim().min(1, {
+    message: "Workspace name is required",
+  }),
+  description: z.string().trim(),
+});
 
 interface CreateWorkspaceDialogProps {
   isOpen: boolean;
@@ -33,14 +42,8 @@ const CreateWorkspaceDialog = ({
   isOpen,
   onClose,
 }: CreateWorkspaceDialogProps) => {
-  const [isPending] = useState(false);
-
-  const formSchema = z.object({
-    name: z.string().trim().min(1, {
-      message: "Workspace name is required",
-    }),
-    description: z.string().trim(),
-  });
+  const [createWorkspace, { isLoading: isPending }] =
+    useCreateWorkspaceMutation();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,11 +53,16 @@ const CreateWorkspaceDialog = ({
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log("Create workspace:", values);
-    form.reset();
-    onClose();
-  };
+  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
+    try {
+      await createWorkspace(values).unwrap();
+      toast.success("Workspace created successfully!");
+      form.reset();
+      onClose();
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to create workspace!");
+    }
+  }, [createWorkspace, form, onClose]);
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -67,7 +75,7 @@ const CreateWorkspaceDialog = ({
     <Dialog modal={true} open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader className="text-center pb-2">
-          <motion.div 
+          <motion.div
             className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/20"
             initial={{ scale: 0, rotate: -180 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -91,7 +99,6 @@ const CreateWorkspaceDialog = ({
         </DialogHeader>
 
         <div className="px-1">
-
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <motion.div
@@ -156,7 +163,7 @@ const CreateWorkspaceDialog = ({
                 />
               </motion.div>
 
-              <motion.div 
+              <motion.div
                 className="flex flex-col-reverse sm:flex-row gap-3 pt-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -176,11 +183,10 @@ const CreateWorkspaceDialog = ({
                   whileTap={{ scale: 0.98 }}
                   className="flex-1"
                 >
-                  <Button 
-                    type="submit" 
-                    className="w-full h-11 font-semibold"
-                  >
-                    {isPending && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+                  <Button type="submit" className="w-full h-11 font-semibold">
+                    {isPending && (
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     Create Workspace
                   </Button>
                 </motion.div>

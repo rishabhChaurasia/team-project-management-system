@@ -38,7 +38,7 @@ export const workspaceApi = createApi({
       }),
       invalidatesTags: ["Workspace"],
     }),
-    getAllworkspacesUserIsMember: builder.query({
+    getAllMyWorkspace: builder.query({
       query: () => ({
         url: "/workspace/all",
         method: "GET",
@@ -72,7 +72,7 @@ export const {
   useUpdateWorkspaceMutation,
   useChangeWorkspaceMemberRoleMutation,
   useDeleteWorkspaceMutation,
-  useGetAllworkspacesUserIsMemberQuery,
+  useGetAllMyWorkspaceQuery,
   useGetWorkspaceMembersQuery,
   useGetWorkspaceAnalyticsQuery,
   useGetWorkspaceByIdQuery,

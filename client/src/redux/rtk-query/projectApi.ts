@@ -6,6 +6,7 @@ export const projectApi = createApi({
   reducerPath: "projectApi",
   baseQuery: fetchBaseQuery({ baseUrl: baseUrl, credentials: "include" }),
   tagTypes: ["Project"],
+  keepUnusedDataFor: 600, // 10 minutes cache
   endpoints: (builder) => ({
     // create project
     createProject: builder.mutation({
@@ -43,6 +44,7 @@ export const projectApi = createApi({
         method: "GET",
       }),
       providesTags: ["Project"],
+      keepUnusedDataFor: 900, // 15 minutes for project list
     }),
 
     // get project analytics

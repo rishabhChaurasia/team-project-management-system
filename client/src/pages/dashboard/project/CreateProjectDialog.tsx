@@ -1,8 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { motion } from "framer-motion";
+import { useCreateProjectMutation } from "@/redux/rtk-query/projectApi";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
+import { Loader, CheckCircle2 } from "lucide-react";
+
+const formSchema = z.object({
+  name: z.string().trim().min(1, {
+    message: "Project title is required",
+  }),
+  description: z.string().trim(),
+});
+
+const emojis = ["📊", "🚀", "📱", "🎨", "💼", "🔧", "📈", "🎯", "💡", "🌟"];
 import {
   Form,
   FormControl,
@@ -32,16 +45,10 @@ interface CreateProjectDialogProps {
 }
 
 const CreateProjectDialog = ({ isOpen, onClose }: CreateProjectDialogProps) => {
+  const { workspaceId } = useParams();
+  const [createProject, { isLoading: isPending }] = useCreateProjectMutation();
   const [emoji, setEmoji] = useState("📊");
-  const [isPending] = useState(false);
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
-
-  const formSchema = z.object({
-    name: z.string().trim().min(1, {
-      message: "Project title is required",
-    }),
-    description: z.string().trim(),
-  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,10 +58,10 @@ const CreateProjectDialog = ({ isOpen, onClose }: CreateProjectDialogProps) => {
     },
   });
 
-  const handleEmojiSelection = (selectedEmoji: string) => {
+  const handleEmojiSelection = useCallback((selectedEmoji: string) => {
     setEmoji(selectedEmoji);
     setIsEmojiPickerOpen(false);
-  };
+  }, []);
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -63,24 +70,39 @@ const CreateProjectDialog = ({ isOpen, onClose }: CreateProjectDialogProps) => {
       setEmoji("📊");
       // Auto-focus on project title after a brief delay
       setTimeout(() => {
-        const titleInput = document.querySelector('input[name="name"]') as HTMLInputElement;
+        const titleInput = document.querySelector(
+          'input[name="name"]'
+        ) as HTMLInputElement;
         titleInput?.focus();
       }, 100);
     }
   }, [isOpen, form]);
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log("Create project:", { emoji, ...values });
-    form.reset();
-    setEmoji("📊");
-    onClose();
-  };
+  const onSubmit = useCallback(
+    async (values: z.infer<typeof formSchema>) => {
+      try {
+        await createProject({
+          workspaceId,
+          project: {
+            emoji,
+            name: values.name,
+            description: values.description,
+          },
+        }).unwrap();
+        toast.success("Project created successfully!");
+        form.reset();
+        setEmoji("📊");
+        onClose();
+      } catch (error: any) {
+        toast.error(error?.data?.message || "Failed to create project!");
+      }
+    },
+    [createProject, workspaceId, emoji, form, onClose]
+  );
 
-  // Simple emoji picker component
-  const EmojiPicker = () => {
-    const emojis = ["📊", "🚀", "📱", "🎨", "💼", "🔧", "📈", "🎯", "💡", "🌟"];
-    return (
-      <motion.div 
+  const EmojiPicker = useCallback(
+    () => (
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="grid grid-cols-5 gap-2 p-4"
@@ -94,15 +116,16 @@ const CreateProjectDialog = ({ isOpen, onClose }: CreateProjectDialogProps) => {
             transition={{ delay: index * 0.02 }}
             onClick={() => handleEmojiSelection(e)}
             className={`text-2xl p-2 hover:bg-accent rounded transition-colors ${
-              emoji === e ? 'bg-accent' : ''
+              emoji === e ? "bg-accent" : ""
             }`}
           >
             {e}
           </motion.button>
         ))}
       </motion.div>
-    );
-  };
+    ),
+    [emoji, handleEmojiSelection]
+  );
 
   return (
     <Dialog modal={true} open={isOpen} onOpenChange={onClose}>
@@ -113,7 +136,7 @@ const CreateProjectDialog = ({ isOpen, onClose }: CreateProjectDialogProps) => {
           </DialogTitle>
         </DialogHeader>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
@@ -129,7 +152,10 @@ const CreateProjectDialog = ({ isOpen, onClose }: CreateProjectDialogProps) => {
                 <label className="block text-sm font-medium mb-2">
                   Select Emoji
                 </label>
-                <Popover open={isEmojiPickerOpen} onOpenChange={setIsEmojiPickerOpen}>
+                <Popover
+                  open={isEmojiPickerOpen}
+                  onOpenChange={setIsEmojiPickerOpen}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       type="button"
@@ -150,7 +176,12 @@ const CreateProjectDialog = ({ isOpen, onClose }: CreateProjectDialogProps) => {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Project title</FormLabel>
+                    <FormLabel className="flex items-center gap-1">
+                      Project title
+                      {field.value?.trim() && (
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                      )}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Website Redesign"
@@ -200,10 +231,11 @@ const CreateProjectDialog = ({ isOpen, onClose }: CreateProjectDialogProps) => {
                 <motion.div whileTap={{ scale: 0.95 }} className="flex-1">
                   <Button
                     type="submit"
-                    disabled={isPending || !form.watch('name')?.trim()}
+                    disabled={isPending || !form.watch("name")?.trim()}
                     className="w-full"
                   >
-                    {isPending ? 'Creating...' : 'Create'}
+                    {isPending && <Loader className="mr-2 h-4 w-4 animate-spin" />}
+                    {isPending ? "Creating..." : "Create"}
                   </Button>
                 </motion.div>
               </div>

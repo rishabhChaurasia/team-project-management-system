@@ -17,8 +17,11 @@ import {
   useGetCurrentUserQuery,
   useLogoutUserMutation,
 } from "@/redux/rtk-query/authApi";
+import { useGetAllMyWorkspaceQuery } from "@/redux/rtk-query/workspaceApi";
+import { useGetAllProjectInWorkspaceQuery } from "@/redux/rtk-query/projectApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Sidebar,
   SidebarContent,
@@ -66,6 +69,16 @@ const AppSidebar = () => {
   const { workspaceId } = useParams();
   const navigate = useNavigate();
   const { data } = useGetCurrentUserQuery(undefined);
+  const { data: workspacesData, isLoading: isWorkspacesLoading } = useGetAllMyWorkspaceQuery(undefined);
+  const { data: projectsData, isLoading: isProjectsLoading } =
+    useGetAllProjectInWorkspaceQuery(workspaceId, {
+      skip: !workspaceId,
+    });
+
+  const currentWorkspace =
+    workspacesData?.workspaces?.find(
+      (workspace: any) => workspace._id === workspaceId
+    ) || data?.user?.currentWorkspace;
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
@@ -148,12 +161,21 @@ const AppSidebar = () => {
                         T
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight">
-                        <span className="truncate font-semibold">
-                          {data?.user?.currentWorkspace?.name || "Workspace"}
-                        </span>
-                        <span className="truncate text-xs">
-                          {data?.user?.currentWorkspace?.description || "Free"}
-                        </span>
+                        {isWorkspacesLoading ? (
+                          <>
+                            <Skeleton className="h-4 w-24" />
+                            <Skeleton className="h-3 w-16 mt-1" />
+                          </>
+                        ) : (
+                          <>
+                            <span className="truncate font-semibold">
+                              {currentWorkspace?.name || "Workspace"}
+                            </span>
+                            <span className="truncate text-xs">
+                              {currentWorkspace?.description || "Free"}
+                            </span>
+                          </>
+                        )}
                       </div>
                       <ChevronDown className="ml-auto" />
                     </SidebarMenuButton>
@@ -166,23 +188,32 @@ const AppSidebar = () => {
                     <DropdownMenuLabel className="text-xs text-muted-foreground">
                       Workspaces
                     </DropdownMenuLabel>
-                    <DropdownMenuItem className="gap-2 p-2 cursor-pointer">
-                      <div className="flex size-6 items-center justify-center rounded-sm border bg-primary text-primary-foreground font-semibold">
-                        T
-                      </div>
-                      <span className="flex-1">
-                        {data?.user?.currentWorkspace?.name || "Team Workspace"}
-                      </span>
-                      <DropdownMenuShortcut className="tracking-normal !opacity-100">
-                        <Check className="w-4 h-4 text-green-600" />
-                      </DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="gap-2 p-2 cursor-pointer">
-                      <div className="flex size-6 items-center justify-center rounded-sm border bg-muted text-muted-foreground font-semibold">
-                        P
-                      </div>
-                      <span className="flex-1">Personal Workspace</span>
-                    </DropdownMenuItem>
+                    {isWorkspacesLoading ? (
+                      Array.from({ length: 2 }).map((_, index) => (
+                        <div key={index} className="gap-2 p-2 flex items-center">
+                          <Skeleton className="h-6 w-6 rounded-sm" />
+                          <Skeleton className="h-4 flex-1" />
+                        </div>
+                      ))
+                    ) : (
+                      workspacesData?.workspaces?.map((workspace: any) => (
+                      <DropdownMenuItem
+                        key={workspace._id}
+                        className="gap-2 p-2 cursor-pointer"
+                        onClick={() => navigate(`/workspace/${workspace._id}`)}
+                      >
+                        <div className="flex size-6 items-center justify-center rounded-sm border bg-primary text-primary-foreground font-semibold">
+                          {workspace.name[0].toUpperCase()}
+                        </div>
+                        <span className="flex-1">{workspace.name}</span>
+                        {workspace._id === workspaceId && (
+                          <DropdownMenuShortcut className="tracking-normal !opacity-100">
+                            <Check className="w-4 h-4 text-green-600" />
+                          </DropdownMenuShortcut>
+                        )}
+                      </DropdownMenuItem>
+                      ))
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       className="gap-2 p-2 cursor-pointer hover:bg-accent"
@@ -216,117 +247,56 @@ const AppSidebar = () => {
               </Button>
             </SidebarGroupLabel>
             <SidebarMenu className="max-h-[200px] overflow-y-auto scrollbar-thin">
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className="hover:bg-sidebar-accent/50 transition-colors group"
-                >
-                  <Link to={`/workspace/${workspaceId}/project/1`}>
-                    <span className="text-base">🚀</span>
-                    <span className="truncate">Website Redesign</span>
-                  </Link>
-                </SidebarMenuButton>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction
-                      showOnHover
-                      className="hover:bg-accent transition-colors"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Project actions</span>
-                    </SidebarMenuAction>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-48 rounded-lg"
-                    side="right"
-                    align="start"
-                  >
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Folder className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span>View Project</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Delete Project</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className="hover:bg-sidebar-accent/50 transition-colors group"
-                >
-                  <Link to={`/workspace/${workspaceId}/project/2`}>
-                    <span className="text-base">📱</span>
-                    <span className="truncate">Mobile App Development</span>
-                  </Link>
-                </SidebarMenuButton>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction
-                      showOnHover
-                      className="hover:bg-accent transition-colors"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Project actions</span>
-                    </SidebarMenuAction>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-48 rounded-lg"
-                    side="right"
-                    align="start"
-                  >
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Folder className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span>View Project</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Delete Project</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  className="hover:bg-sidebar-accent/50 transition-colors group"
-                >
-                  <Link to={`/workspace/${workspaceId}/project/3`}>
-                    <span className="text-base">🎨</span>
-                    <span className="truncate">Brand Identity</span>
-                  </Link>
-                </SidebarMenuButton>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <SidebarMenuAction
-                      showOnHover
-                      className="hover:bg-accent transition-colors"
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Project actions</span>
-                    </SidebarMenuAction>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    className="w-48 rounded-lg"
-                    side="right"
-                    align="start"
-                  >
-                    <DropdownMenuItem className="cursor-pointer">
-                      <Folder className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span>View Project</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Delete Project</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </SidebarMenuItem>
+              {isProjectsLoading
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <SidebarMenuItem key={index}>
+                      <div className="flex items-center gap-2 px-2 py-1.5">
+                        <Skeleton className="h-4 w-4 rounded" />
+                        <Skeleton className="h-4 flex-1" />
+                      </div>
+                    </SidebarMenuItem>
+                  ))
+                : (projectsData as any)?.projects?.map((project: any) => (
+                    <SidebarMenuItem key={project._id}>
+                      <SidebarMenuButton
+                        asChild
+                        className="hover:bg-sidebar-accent/50 transition-colors group"
+                      >
+                        <Link
+                          to={`/workspace/${workspaceId}/project/${project._id}`}
+                        >
+                          <span className="text-base">{project.emoji}</span>
+                          <span className="truncate">{project.name}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <SidebarMenuAction
+                            showOnHover
+                            className="hover:bg-accent transition-colors"
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                            <span className="sr-only">Project actions</span>
+                          </SidebarMenuAction>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          className="w-48 rounded-lg"
+                          side="right"
+                          align="start"
+                        >
+                          <DropdownMenuItem className="cursor-pointer">
+                            <Folder className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span>View Project</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950/20">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Delete Project</span>
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </SidebarMenuItem>
+                  ))}
             </SidebarMenu>
           </SidebarGroup>
 
