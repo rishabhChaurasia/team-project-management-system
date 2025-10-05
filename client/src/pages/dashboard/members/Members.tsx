@@ -5,12 +5,17 @@ import WorkspaceHeader from "@/pages/dashboard/workspace/WorkspaceHeader";
 import { motion } from "motion/react";
 import { useParams } from "react-router-dom";
 import { useGetCurrentUserQuery } from "@/redux/rtk-query/authApi";
-import { useGetWorkspaceMembersQuery } from "@/redux/rtk-query/workspaceApi";
+import {
+  useGetWorkspaceMembersQuery,
+  useGetWorkspaceByIdQuery,
+} from "@/redux/rtk-query/workspaceApi";
 
 export default function Members() {
   const { workspaceId } = useParams();
   const { data: currentUserData } = useGetCurrentUserQuery(undefined);
   const { data: membersData } = useGetWorkspaceMembersQuery(workspaceId!);
+  const { data: workspaceData, isLoading: workspaceLoading } =
+    useGetWorkspaceByIdQuery(workspaceId!);
 
   if (!workspaceId) {
     return <div>Workspace not found</div>;
@@ -30,7 +35,10 @@ export default function Members() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6 }}
     >
-      <WorkspaceHeader />
+      <WorkspaceHeader
+        workspace={workspaceData?.workspace}
+        isLoading={workspaceLoading}
+      />
       <motion.main
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
