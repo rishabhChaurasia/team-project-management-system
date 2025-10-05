@@ -5,6 +5,7 @@ import { Progress } from "./components/ui/progress";
 import {
   ForgotPassword,
   GoogleOauthFailure,
+  JoinWorkspace,
   Login,
   Members,
   ProjectDetails,
@@ -45,6 +46,10 @@ const App = () => {
           <Route
             path="/workspace/:workspaceId/project/:projectId"
             element={<ProjectDetails />}
+          />
+          <Route
+            path="/invite/workspace/:inviteCode/join"
+            element={<JoinWorkspace />}
           />
         </Route>
       </Routes>

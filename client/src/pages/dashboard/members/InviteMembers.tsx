@@ -2,18 +2,27 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckIcon, CopyIcon, Loader } from "lucide-react";
+import { CheckIcon, CopyIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useGetWorkspaceByIdQuery } from "@/redux/rtk-query/workspaceApi";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const InviteMember = () => {
-  // Dummy data
-  const workspaceLoading = false;
-  const workspace = {
-    inviteCode: "abc123",
-  };
+const InviteMember = ({ workspaceId }: { workspaceId?: string }) => {
+  const { data: workspace, isLoading: workspaceLoading } =
+    useGetWorkspaceByIdQuery(workspaceId);
   const [copied, setCopied] = useState(false);
 
-  const inviteUrl = `${window.location.origin}/invite/${workspace.inviteCode}`;
+  const inviteUrl = workspace?.workspace?.inviteCode
+    ? `${window.location.origin}/invite/workspace/${
+        workspace.workspace.inviteCode
+      }/join?name=${encodeURIComponent(
+        workspace.workspace.name
+      )}&description=${encodeURIComponent(
+        workspace.workspace.description
+      )}&members=${
+        workspace.workspace.members?.length || 0
+      }&createdAt=${encodeURIComponent(workspace.workspace.createdAt)}`
+    : `${window.location.origin}/invite/workspace/loading/join`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(inviteUrl).then(() => {
@@ -34,8 +43,9 @@ const InviteMember = () => {
       </div>
 
       {workspaceLoading ? (
-        <div className="flex justify-center py-4">
-          <Loader className="w-6 h-6 animate-spin" />
+        <div className="flex gap-2">
+          <Skeleton className="flex-1 h-10" />
+          <Skeleton className="w-10 h-10" />
         </div>
       ) : (
         <div className="flex gap-2">
@@ -46,17 +56,19 @@ const InviteMember = () => {
             id="link"
             disabled={true}
             className="flex-1 font-mono text-sm"
-            value={inviteUrl}
+            value={
+              workspace?.workspace?.inviteCode
+                ? inviteUrl
+                : "No invite code available"
+            }
             readOnly
           />
-          <motion.div
-            whileTap={{ scale: 0.95 }}
-            transition={{ duration: 0.1 }}
-          >
+          <motion.div whileTap={{ scale: 0.95 }} transition={{ duration: 0.1 }}>
             <Button
               className="shrink-0"
               size="icon"
               onClick={handleCopy}
+              disabled={!workspace?.workspace?.inviteCode}
             >
               <AnimatePresence mode="wait">
                 {copied ? (

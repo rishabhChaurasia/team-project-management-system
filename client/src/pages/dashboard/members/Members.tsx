@@ -3,8 +3,11 @@ import InviteMember from "@/pages/dashboard/members/InviteMembers";
 import AllMembers from "@/pages/dashboard/members/AllMembers";
 import WorkspaceHeader from "@/pages/dashboard/workspace/WorkspaceHeader";
 import { motion } from "motion/react";
+import { useParams } from "react-router-dom";
 
 export default function Members() {
+  const { workspaceId } = useParams();
+  
   return (
     <motion.div
       className="w-full h-auto pt-2 px-4 sm:px-6"
@@ -41,7 +44,7 @@ export default function Members() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.4 }}
           >
-            <InviteMember />
+            <InviteMember workspaceId={workspaceId} />
           </motion.div>
 
           <Separator className="opacity-30" />

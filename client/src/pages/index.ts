@@ -14,4 +14,7 @@ export const Workspace = lazy(() => import("./dashboard/workspace/Workspace"));
 export const Tasks = lazy(() => import("./dashboard/tasks/Tasks"));
 export const Members = lazy(() => import("./dashboard/members/Members"));
 export const Settings = lazy(() => import("./dashboard/Settings"));
-export const ProjectDetails = lazy(() => import("./dashboard/project/ProjectDetails"));
+export const ProjectDetails = lazy(
+  () => import("./dashboard/project/ProjectDetails")
+);
+export const JoinWorkspace = lazy(() => import("./invite/JoinWorkspace"));
