@@ -33,10 +33,7 @@ const Login = () => {
 
   const formSchema = z.object({
     email: z.email({ message: "Please enter a valid email address" }).trim(),
-    password: z
-      .string()
-      .trim()
-      .min(6, { message: "Password must be at least 6 characters" }),
+    password: z.string().trim(),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -50,10 +47,10 @@ const Login = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await loginUser(values).unwrap();
+      const response = await loginUser(values).unwrap();
       toast.success("Login Successful!");
       form.reset();
-      navigate("/dashboard");
+      navigate(`/workspace/${response.user.currentWorkspace}`);
     } catch (error: any) {
       toast.error(error?.data?.message || "Login failed!");
     }

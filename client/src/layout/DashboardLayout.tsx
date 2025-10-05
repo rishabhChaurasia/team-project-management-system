@@ -1,9 +1,34 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import AppHeader from "@/pages/dashboard/AppHeader";
 import AppSidebar from "@/pages/dashboard/AppSidebar";
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate, useParams } from "react-router-dom";
+import { useGetCurrentUserQuery } from "@/redux/rtk-query/authApi";
+import { Progress } from "@/components/ui/progress";
 
 const DashboardLayout = () => {
+  const { workspaceId } = useParams();
+  const { data, isLoading, error } = useGetCurrentUserQuery(undefined);
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="w-80 space-y-4">
+          <Progress value={50} />
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !data?.user) {
+    return <Navigate to="/sign-in" replace />;
+  }
+
+  if (workspaceId && data.user.currentWorkspace?._id !== workspaceId) {
+    return (
+      <Navigate to={`/workspace/${data.user.currentWorkspace._id}`} replace />
+    );
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />

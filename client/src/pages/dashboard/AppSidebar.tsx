@@ -14,6 +14,12 @@ import {
 import { useParams } from "react-router-dom";
 import { useState } from "react";
 import {
+  useGetCurrentUserQuery,
+  useLogoutUserMutation,
+} from "@/redux/rtk-query/authApi";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -58,9 +64,24 @@ type ItemType = {
 
 const AppSidebar = () => {
   const { workspaceId } = useParams();
+  const navigate = useNavigate();
+  const { data } = useGetCurrentUserQuery(undefined);
+  const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser(undefined).unwrap();
+      toast.success("Logged out successfully!");
+      navigate("/sign-in");
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Logout failed!");
+    } finally {
+      setIsLogoutOpen(false);
+    }
+  };
 
   // Main navigation items for workspace-level features
   const items: ItemType[] = [
@@ -91,7 +112,7 @@ const AppSidebar = () => {
       <Sidebar>
         {/* App Header - Brand name and logo */}
         <SidebarHeader>
-          <motion.h2 
+          <motion.h2
             className="text-xl font-bold px-4 py-2"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -128,9 +149,11 @@ const AppSidebar = () => {
                       </div>
                       <div className="grid flex-1 text-left text-sm leading-tight">
                         <span className="truncate font-semibold">
-                          Team Workspace
+                          {data?.user?.currentWorkspace?.name || "Workspace"}
                         </span>
-                        <span className="truncate text-xs">Free</span>
+                        <span className="truncate text-xs">
+                          {data?.user?.currentWorkspace?.description || "Free"}
+                        </span>
                       </div>
                       <ChevronDown className="ml-auto" />
                     </SidebarMenuButton>
@@ -147,7 +170,9 @@ const AppSidebar = () => {
                       <div className="flex size-6 items-center justify-center rounded-sm border bg-primary text-primary-foreground font-semibold">
                         T
                       </div>
-                      <span className="flex-1">Team Workspace</span>
+                      <span className="flex-1">
+                        {data?.user?.currentWorkspace?.name || "Team Workspace"}
+                      </span>
                       <DropdownMenuShortcut className="tracking-normal !opacity-100">
                         <Check className="w-4 h-4 text-green-600" />
                       </DropdownMenuShortcut>
@@ -159,7 +184,7 @@ const AppSidebar = () => {
                       <span className="flex-1">Personal Workspace</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       className="gap-2 p-2 cursor-pointer hover:bg-accent"
                       onClick={() => setIsCreateWorkspaceOpen(true)}
                     >
@@ -339,18 +364,28 @@ const AppSidebar = () => {
 
         {/* User Profile Section - Shows current user info and logout option */}
         <SidebarFooter>
-          <motion.div 
+          <motion.div
             className="flex items-center gap-3 p-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.4 }}
           >
             <Avatar>
-              <AvatarFallback>JD</AvatarFallback>
+              <AvatarFallback>
+                {data?.user?.name
+                  ?.split(" ")
+                  .map((n: string) => n[0])
+                  .join("")
+                  .toUpperCase() || "U"}
+              </AvatarFallback>
             </Avatar>
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium">John Doe</p>
-              <p className="text-xs text-muted-foreground">john@example.com</p>
+              <p className="text-sm font-medium">
+                {data?.user?.name || "User"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {data?.user?.email || "user@example.com"}
+              </p>
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -378,51 +413,69 @@ const AppSidebar = () => {
       </Sidebar>
 
       {/* Logout Confirmation Modal - Styled like auth forms for consistency */}
-      <Dialog open={isLogoutOpen} onOpenChange={setIsLogoutOpen}>
+      <Dialog modal={true} open={isLogoutOpen} onOpenChange={setIsLogoutOpen}>
         <DialogContent className="sm:max-w-md">
-          <Card className="border-0 shadow-none">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
-                <LogOut className="h-6 w-6 text-red-600 dark:text-red-400" />
-              </div>
-              <CardTitle className="text-xl">Sign Out</CardTitle>
-              <CardDescription>
-                Are you sure you want to sign out? You'll need to sign in again
-                to access your account.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col-reverse sm:flex-row gap-3">
-                <Button
-                  onClick={() => setIsLogoutOpen(false)}
-                  variant="outline"
-                  className="flex-1"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card className="border-0 shadow-none">
+              <CardHeader className="text-center">
+                <motion.div
+                  className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1, duration: 0.3, type: "spring" }}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => setIsLogoutOpen(false)}
-                  variant="destructive"
-                  className="flex-1"
+                  <LogOut className="h-6 w-6 text-red-600 dark:text-red-400" />
+                </motion.div>
+                <CardTitle className="text-xl">Sign Out</CardTitle>
+                <CardDescription>
+                  Are you sure you want to sign out? You'll need to sign in
+                  again to access your account.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <motion.div
+                  className="flex flex-col-reverse sm:flex-row gap-3"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
                 >
-                  Sign Out
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                  <Button
+                    onClick={() => setIsLogoutOpen(false)}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleLogout}
+                    variant="destructive"
+                    className="flex-1"
+                    disabled={isLoggingOut}
+                  >
+                    {isLoggingOut ? "Signing Out..." : "Sign Out"}
+                  </Button>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </DialogContent>
       </Dialog>
 
       {/* Create Workspace Dialog */}
-      <CreateWorkspaceDialog 
-        isOpen={isCreateWorkspaceOpen} 
-        onClose={() => setIsCreateWorkspaceOpen(false)} 
+      <CreateWorkspaceDialog
+        isOpen={isCreateWorkspaceOpen}
+        onClose={() => setIsCreateWorkspaceOpen(false)}
       />
 
       {/* Create Project Dialog */}
-      <CreateProjectDialog 
-        isOpen={isCreateProjectOpen} 
-        onClose={() => setIsCreateProjectOpen(false)} 
+      <CreateProjectDialog
+        isOpen={isCreateProjectOpen}
+        onClose={() => setIsCreateProjectOpen(false)}
       />
     </>
   );

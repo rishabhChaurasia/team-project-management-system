@@ -22,10 +22,7 @@ const App = () => {
       fallback={
         <div className="flex min-h-screen items-center justify-center">
           <div className="w-80 space-y-4">
-            <div className="text-center">
-              <h2 className="text-lg font-semibold">Loading...</h2>
-            </div>
-            <Progress value={66} />
+            <Progress value={76} />
           </div>
         </div>
       }
