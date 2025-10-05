@@ -1,4 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { workspaceApi } from "./workspaceApi";
+import { memberApi } from "./memberApi";
+import { projectApi } from "./projectApi";
+import { taskApi } from "./taskApi";
 
 const baseUrl: string = import.meta.env.VITE_BASE_URL;
 
@@ -41,6 +45,16 @@ export const authApi = createApi({
         method: "POST",
       }),
       invalidatesTags: ["Auth"],
+      async onQueryStarted(_, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(authApi.util.resetApiState());
+          dispatch(workspaceApi.util.resetApiState());
+          dispatch(memberApi.util.resetApiState());
+          dispatch(projectApi.util.resetApiState());
+          dispatch(taskApi.util.resetApiState());
+        } catch {}
+      },
     }),
     forgotPassword: builder.mutation({
       query: (email) => ({
