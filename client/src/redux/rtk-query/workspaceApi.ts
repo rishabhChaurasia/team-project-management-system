@@ -6,6 +6,7 @@ export const workspaceApi = createApi({
   reducerPath: "workspaceApi",
   baseQuery: fetchBaseQuery({ baseUrl: baseUrl, credentials: "include" }),
   tagTypes: ["Workspace"],
+  keepUnusedDataFor: 600, // 10 minutes cache for all endpoints
   endpoints: (builder) => ({
     createWorkspace: builder.mutation({
       query: (workspace) => ({
@@ -50,12 +51,15 @@ export const workspaceApi = createApi({
         url: `/workspace/members/${id}`,
         method: "GET",
       }),
+      providesTags: ["Workspace"],
+      keepUnusedDataFor: 600, // 10 minutes cache
     }),
     getWorkspaceAnalytics: builder.query({
       query: (id) => ({
         url: `/workspace/analytics/${id}`,
         method: "GET",
       }),
+      providesTags: ["Workspace"],
     }),
     getWorkspaceById: builder.query({
       query: (id) => ({

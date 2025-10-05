@@ -4,10 +4,25 @@ import AllMembers from "@/pages/dashboard/members/AllMembers";
 import WorkspaceHeader from "@/pages/dashboard/workspace/WorkspaceHeader";
 import { motion } from "motion/react";
 import { useParams } from "react-router-dom";
+import { useGetCurrentUserQuery } from "@/redux/rtk-query/authApi";
+import { useGetWorkspaceMembersQuery } from "@/redux/rtk-query/workspaceApi";
 
 export default function Members() {
   const { workspaceId } = useParams();
-  
+  const { data: currentUserData } = useGetCurrentUserQuery(undefined);
+  const { data: membersData } = useGetWorkspaceMembersQuery(workspaceId!);
+
+  if (!workspaceId) {
+    return <div>Workspace not found</div>;
+  }
+
+  const members = membersData?.members || [];
+  const currentUser = members.find(
+    (member: any) => member.userId._id === currentUserData?.user?._id
+  );
+  const canInviteMembers =
+    currentUser?.role.name === "OWNER" || currentUser?.role.name === "ADMIN";
+
   return (
     <motion.div
       className="w-full h-auto pt-2 px-4 sm:px-6"
@@ -39,22 +54,26 @@ export default function Members() {
 
           <Separator className="opacity-60" />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.4 }}
-          >
-            <InviteMember workspaceId={workspaceId} />
-          </motion.div>
+          {canInviteMembers && (
+            <>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+              >
+                <InviteMember workspaceId={workspaceId!} />
+              </motion.div>
 
-          <Separator className="opacity-30" />
+              <Separator className="opacity-30" />
+            </>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.4 }}
           >
-            <AllMembers />
+            <AllMembers workspaceId={workspaceId!} />
           </motion.div>
         </div>
       </motion.main>
