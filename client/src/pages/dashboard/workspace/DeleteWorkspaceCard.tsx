@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,26 +10,39 @@ import {
 } from "@/components/ui/dialog";
 import { Loader, AlertTriangle, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useDeleteWorkspaceMutation } from "@/redux/rtk-query/workspaceApi";
+import { useGetCurrentUserQuery } from "@/redux/rtk-query/authApi";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
-const DeleteWorkspaceCard = () => {
+interface DeleteWorkspaceCardProps {
+  workspaceId: string;
+}
+
+const DeleteWorkspaceCard = ({ workspaceId }: DeleteWorkspaceCardProps) => {
   const [open, setOpen] = useState(false);
-  const [isPending, setIsPending] = useState(false);
-  const workspace = { name: "My Workspace" };
+  const [deleteWorkspace, { isLoading: isPending }] =
+    useDeleteWorkspaceMutation();
+  const { data: currentUserData } = useGetCurrentUserQuery(undefined);
+  const navigate = useNavigate();
 
-  const onOpenDialog = () => setOpen(true);
-  const onCloseDialog = () => {
+  const handleConfirm = useCallback(async () => {
+    try {
+      await deleteWorkspace(workspaceId).unwrap();
+      toast.success("Workspace deleted successfully!");
+      const currentWorkspaceId = currentUserData?.user?.currentWorkspace?._id;
+      navigate(
+        currentWorkspaceId ? `/workspace/${currentWorkspaceId}` : "/sign-in"
+      );
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to delete workspace");
+    }
+  }, [deleteWorkspace, workspaceId, navigate, currentUserData]);
+
+  const handleCloseDialog = useCallback(() => {
     if (isPending) return;
     setOpen(false);
-  };
-
-  const handleConfirm = () => {
-    console.log("Delete workspace confirmed");
-    setIsPending(true);
-    setTimeout(() => {
-      setIsPending(false);
-      onCloseDialog();
-    }, 1000);
-  };
+  }, [isPending]);
   return (
     <>
       <motion.div
@@ -73,7 +86,7 @@ const DeleteWorkspaceCard = () => {
             <Button
               className="w-full sm:w-auto sm:place-self-end h-[44px] sm:h-[40px] text-sm sm:text-base font-medium cursor-pointer"
               variant="destructive"
-              onClick={onOpenDialog}
+              onClick={() => setOpen(true)}
             >
               <span className="sm:hidden">Delete</span>
               <span className="hidden sm:inline">Delete</span>
@@ -82,7 +95,7 @@ const DeleteWorkspaceCard = () => {
         </div>
       </motion.div>
 
-      <Dialog open={open} onOpenChange={onCloseDialog}>
+      <Dialog open={open} onOpenChange={handleCloseDialog}>
         <DialogContent className="sm:max-w-md">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -95,7 +108,7 @@ const DeleteWorkspaceCard = () => {
                   <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
                 </div>
                 <DialogTitle className="text-lg font-semibold">
-                  Delete {workspace?.name}
+                  Delete Workspace
                 </DialogTitle>
               </div>
               <DialogDescription className="text-sm text-gray-600 dark:text-gray-400">
@@ -115,7 +128,7 @@ const DeleteWorkspaceCard = () => {
             <DialogFooter className="gap-2">
               <Button
                 variant="outline"
-                onClick={onCloseDialog}
+                onClick={handleCloseDialog}
                 disabled={isPending}
                 className="flex-1 sm:flex-none"
               >
