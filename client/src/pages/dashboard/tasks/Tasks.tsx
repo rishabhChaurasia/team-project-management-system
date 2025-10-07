@@ -1,7 +1,9 @@
 import CreateTaskDialog from "@/pages/dashboard/tasks/CreateTaskDialog";
 import TaskTable from "@/pages/dashboard/tasks/TaskTable";
+import { useParams } from "react-router-dom";
 
 export default function Tasks() {
+  const { workspaceId } = useParams();
   return (
     <div className="w-full h-full flex-col space-y-8 pt-3">
       <div className="flex items-center justify-between space-y-2">
@@ -11,7 +13,7 @@ export default function Tasks() {
             Here&apos;s the list of tasks for this workspace!
           </p>
         </div>
-        <CreateTaskDialog />
+        <CreateTaskDialog workspaceId={workspaceId!} />
       </div>
       {/* Task Table */}
       <div>

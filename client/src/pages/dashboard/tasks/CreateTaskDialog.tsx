@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Plus, CalendarIcon, CheckCircle2 } from "lucide-react";
+import { Plus, CalendarIcon, CheckCircle2, Loader } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -35,11 +35,13 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "motion/react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useCreateTaskMutation } from "@/redux/rtk-query/taskApi";
 import { useGetAllProjectInWorkspaceQuery } from "@/redux/rtk-query/projectApi";
+import { useGetWorkspaceMembersQuery } from "@/redux/rtk-query/workspaceApi";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -53,7 +55,10 @@ const formSchema = z.object({
   dueDate: z.date(),
 });
 
-const CreateTaskDialog = (props: { projectId?: string }) => {
+const CreateTaskDialog = (props: {
+  projectId?: string;
+  workspaceId?: string;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const onClose = () => {
@@ -76,7 +81,11 @@ const CreateTaskDialog = (props: { projectId?: string }) => {
           </motion.div>
         </DialogTrigger>
         <DialogContent className="sm:max-w-lg w-[95vw] max-w-[95vw] sm:w-full max-h-[95vh] overflow-y-auto sm:overflow-y-hidden border-0 p-4 sm:p-6">
-          <CreateTaskForm projectId={props.projectId} onClose={onClose} />
+          <CreateTaskForm
+            projectId={props.projectId}
+            workspaceId={props.workspaceId}
+            onClose={onClose}
+          />
         </DialogContent>
       </Dialog>
     </div>
@@ -85,11 +94,19 @@ const CreateTaskDialog = (props: { projectId?: string }) => {
 
 export default CreateTaskDialog;
 
-function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
-  const { projectId, onClose } = props;
-  const { workspaceId } = useParams();
+function CreateTaskForm(props: {
+  projectId?: string;
+  workspaceId?: string;
+  onClose: () => void;
+}) {
+  const { projectId, workspaceId: propsWorkspaceId, onClose } = props;
+  const { workspaceId: paramsWorkspaceId } = useParams();
+  const workspaceId = propsWorkspaceId || paramsWorkspaceId;
   const [createTask, { isLoading: isSubmitting }] = useCreateTaskMutation();
-  const { data: projectsData, isLoading: isProjectsLoading } = useGetAllProjectInWorkspaceQuery(workspaceId);
+  const { data: projectsData, isLoading: isProjectsLoading } =
+    useGetAllProjectInWorkspaceQuery(workspaceId);
+  const { data: membersData, isLoading: isMembersLoading } =
+    useGetWorkspaceMembersQuery(workspaceId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -112,11 +129,11 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
         task: {
           title: values.title,
           description: values.description,
-          priority: values.priority.toUpperCase(),
-          status: values.status.toUpperCase(),
+          priority: values.priority,
+          status: values.status,
           assignedTo: values.assignee,
-          dueDate: format(values.dueDate, "MM-dd-yyyy")
-        }
+          dueDate: format(values.dueDate, "MM-dd-yyyy"),
+        },
       }).unwrap();
       toast.success("Task created successfully!");
       form.reset();
@@ -156,61 +173,84 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
         </motion.div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 sm:space-y-3">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="dark:text-[#f1f7feb5] text-sm flex items-center gap-1">
-                    Task title
-                    {field.value?.trim() && (
-                      <CheckCircle2 className="w-3 h-3 text-green-500" />
-                    )}
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Website Redesign"
-                      className={cn(
-                        "h-10 sm:h-[48px] transition-colors",
-                        field.value?.trim() && "border-green-500"
+          <motion.form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 sm:space-y-3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+          >
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.3 }}
+            >
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="dark:text-[#f1f7feb5] text-sm flex items-center gap-1">
+                      Task title
+                      {field.value?.trim() && (
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
                       )}
-                      {...field}
-                      autoFocus
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Website Redesign"
+                        className={cn(
+                          "h-10 sm:h-[48px] transition-colors",
+                          field.value?.trim() && "border-green-500"
+                        )}
+                        {...field}
+                        autoFocus
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </motion.div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                    Task description
-                    <Badge variant="secondary" className="ml-2 text-xs">
-                      Optional
-                    </Badge>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      rows={2}
-                      placeholder="Add more details about this task..."
-                      className="resize-none transition-colors"
-                      {...field}
-                    />
-                  </FormControl>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {field.value?.length || 0}/500 characters
-                  </p>
-                </FormItem>
-              )}
-            />
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
+            >
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="dark:text-[#f1f7feb5] text-sm">
+                      Task description
+                      <Badge variant="secondary" className="ml-2 text-xs">
+                        Optional
+                      </Badge>
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea
+                        rows={2}
+                        placeholder="Add more details about this task..."
+                        className="resize-none transition-colors"
+                        {...field}
+                      />
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {field.value?.length || 0}/500 characters
+                    </p>
+                  </FormItem>
+                )}
+              />
+            </motion.div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
+            >
               <FormField
                 control={form.control}
                 name="project"
@@ -218,7 +258,9 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
                   <FormItem>
                     <FormLabel className="text-sm flex items-center gap-1">
                       Project
-                      {field.value && <CheckCircle2 className="w-3 h-3 text-green-500" />}
+                      {field.value && (
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                      )}
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -233,9 +275,11 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
                       </FormControl>
                       <SelectContent>
                         {isProjectsLoading ? (
-                          <SelectItem value="loading" disabled>
-                            Loading projects...
-                          </SelectItem>
+                          <div className="p-2 space-y-2">
+                            <Skeleton className="h-8 w-full" />
+                            <Skeleton className="h-8 w-full" />
+                            <Skeleton className="h-8 w-full" />
+                          </div>
                         ) : projectsData?.projects?.length > 0 ? (
                           projectsData.projects.map((proj: any) => (
                             <SelectItem key={proj._id} value={proj._id}>
@@ -277,60 +321,94 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="68b937022a98954da341da6f">👨💻 John Doe</SelectItem>
-                        <SelectItem value="2">👩🎨 Jane Smith</SelectItem>
-                        <SelectItem value="3">👨💼 Mike Johnson</SelectItem>
+                        {isMembersLoading ? (
+                          <div className="p-2 space-y-2">
+                            <Skeleton className="h-8 w-full" />
+                            <Skeleton className="h-8 w-full" />
+                            <Skeleton className="h-8 w-full" />
+                          </div>
+                        ) : membersData?.members?.length > 0 ? (
+                          membersData.members.map((member: any) => (
+                            <SelectItem
+                              key={member._id}
+                              value={member.userId._id}
+                            >
+                              {member.userId.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-members" disabled>
+                            No members found
+                          </SelectItem>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
+            </motion.div>
 
-            <FormField
-              control={form.control}
-              name="dueDate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm flex items-center gap-1">
-                    Due Date
-                    {field.value && <CheckCircle2 className="w-3 h-3 text-green-500" />}
-                  </FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full h-10 justify-start font-normal transition-colors",
-                            !field.value && "text-muted-foreground",
-                            field.value && "border-green-500"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) =>
-                          date < new Date(new Date().setHours(0, 0, 0, 0))
-                        }
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.3 }}
+            >
+              <FormField
+                control={form.control}
+                name="dueDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm flex items-center gap-1">
+                      Due Date
+                      {field.value && (
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                      )}
+                    </FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full h-10 justify-start font-normal transition-colors",
+                              !field.value && "text-muted-foreground",
+                              field.value && "border-green-500"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </motion.div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.3 }}
+            >
               <FormField
                 control={form.control}
                 name="status"
@@ -338,7 +416,9 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
                   <FormItem>
                     <FormLabel className="text-sm flex items-center gap-1">
                       Status
-                      {field.value && <CheckCircle2 className="w-3 h-3 text-green-500" />}
+                      {field.value && (
+                        <CheckCircle2 className="w-3 h-3 text-green-500" />
+                      )}
                     </FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
@@ -352,8 +432,11 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
+                        <SelectItem value="BACKLOG">📋 Backlog</SelectItem>
                         <SelectItem value="TODO">📋 Todo</SelectItem>
-                        <SelectItem value="IN_PROGRESS">⚡ In Progress</SelectItem>
+                        <SelectItem value="IN_PROGRESS">
+                          ⚡ In Progress
+                        </SelectItem>
                         <SelectItem value="IN_REVIEW">👀 In Review</SelectItem>
                         <SelectItem value="DONE">✅ Done</SelectItem>
                       </SelectContent>
@@ -389,16 +472,20 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
                         <SelectItem value="LOW">🟢 Low</SelectItem>
                         <SelectItem value="MEDIUM">🟡 Medium</SelectItem>
                         <SelectItem value="HIGH">🟠 High</SelectItem>
-                        <SelectItem value="URGENT">🔴 Urgent</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
+            </motion.div>
 
-            <div className="flex gap-3 pt-4">
+            <motion.div
+              className="flex gap-3 pt-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.3 }}
+            >
               <Button
                 variant="outline"
                 onClick={onClose}
@@ -408,15 +495,14 @@ function CreateTaskForm(props: { projectId?: string; onClose: () => void }) {
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1"
-              >
+              <Button type="submit" disabled={isSubmitting} className="flex-1">
+                {isSubmitting && (
+                  <Loader className="w-4 h-4 mr-2 animate-spin" />
+                )}
                 {isSubmitting ? "Creating..." : "Create Task"}
               </Button>
-            </div>
-          </form>
+            </motion.div>
+          </motion.form>
         </Form>
       </div>
     </motion.div>
