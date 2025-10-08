@@ -38,10 +38,33 @@ export const taskApi = createApi({
 
     // get all tasks
     getAllTasks: builder.query({
-      query: (workspaceId) => ({
-        url: `/task/workspace/${workspaceId}/all`,
-        method: "GET",
-      }),
+      query: ({
+        workspaceId,
+        projectId,
+        status,
+        priority,
+        assignedTo,
+        keyword,
+        dueDate,
+        pageSize = 10,
+        pageNumber = 1,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (projectId) params.append("projectId", projectId);
+        if (status) params.append("status", status);
+        if (priority) params.append("priority", priority);
+        if (assignedTo) params.append("assignedTo", assignedTo);
+        if (keyword) params.append("keyword", keyword);
+        if (dueDate) params.append("dueDate", dueDate);
+        params.append("pageSize", pageSize.toString());
+        params.append("pageNumber", pageNumber.toString());
+
+        return {
+          url: `/task/workspace/${workspaceId}/all?${params.toString()}`,
+          method: "GET",
+        };
+      },
       providesTags: ["Task"],
     }),
 

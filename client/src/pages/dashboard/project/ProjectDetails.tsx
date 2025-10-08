@@ -1,7 +1,7 @@
 import { Separator } from "@/components/ui/separator";
 import ProjectAnalyticsCard from "./ProjectAnalyticsCard";
 import ProjectHeader from "./ProjectHeader";
-import TaskTable from "../tasks/TaskTable";
+// import TaskTable from "../tasks/TaskTable";
 
 const ProjectDetails = () => {
   return (
@@ -11,7 +11,7 @@ const ProjectDetails = () => {
         <ProjectAnalyticsCard title="Total Tasks" value={12} isLoading={false} />
         <Separator />
         {/* Task Table */}
-        <TaskTable />
+        {/* <TaskTable /> */}
       </div>
     </div>
   );
