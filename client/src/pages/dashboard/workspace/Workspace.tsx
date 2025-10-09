@@ -1,5 +1,6 @@
 import { Plus, FolderOpen, CheckSquare, Users } from "lucide-react";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "motion/react";
@@ -8,10 +9,29 @@ import RecentProjects from "../project/RecentProjects";
 import RecentTasks from "../tasks/RecentTasks";
 import RecentMembers from "../members/RecentMembers";
 import CreateProjectDialog from "../project/CreateProjectDialog";
+import {
+  useGetWorkspaceAnalyticsQuery,
+  useGetWorkspaceMembersQuery,
+} from "@/redux/rtk-query/workspaceApi";
+import { useGetCurrentUserQuery } from "@/redux/rtk-query/authApi";
 
 const Workspace = () => {
+  const { workspaceId } = useParams();
   const [isCreateProjectOpen, setIsCreateProjectOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("projects");
+
+  const { data: analyticsData, isLoading: analyticsLoading } =
+    useGetWorkspaceAnalyticsQuery(workspaceId!);
+  const { data: currentUserData } = useGetCurrentUserQuery(undefined);
+  const { data: membersData } = useGetWorkspaceMembersQuery(workspaceId!);
+
+  const analytics = analyticsData?.analytics;
+  const members = membersData?.members || [];
+  const currentUser = members.find(
+    (member: any) => member.userId._id === currentUserData?.user?._id
+  );
+  const canCreateProject =
+    currentUser?.role.name === "OWNER" || currentUser?.role.name === "ADMIN";
 
   const getSliderTransform = () => {
     switch (activeTab) {
@@ -26,13 +46,6 @@ const Workspace = () => {
     }
   };
 
-  // Dummy analytics data
-  const analyticsData = [
-    { title: "Total Task", value: 24, isLoading: false },
-    { title: "Completed Task", value: 18, isLoading: false },
-    { title: "Overdue Task", value: 3, isLoading: false },
-  ];
-
   return (
     <main className="flex flex-1 flex-col py-4 md:pt-3">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -44,25 +57,34 @@ const Workspace = () => {
             Here&apos;s an overview for this workspace!
           </p>
         </div>
-        <Button
-          onClick={() => setIsCreateProjectOpen(true)}
-          className="w-full sm:w-auto"
-        >
-          <Plus className="w-4 h-4" />
-          <span className="sm:inline">New Project</span>
-        </Button>
+        {canCreateProject && (
+          <Button
+            onClick={() => setIsCreateProjectOpen(true)}
+            className="w-full sm:w-auto"
+          >
+            <Plus className="w-4 h-4" />
+            <span className="sm:inline">New Project</span>
+          </Button>
+        )}
       </div>
 
       {/* Analytics Cards */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-4">
-        {analyticsData.map((data, index) => (
-          <AnalyticsCard
-            key={index}
-            title={data.title}
-            value={data.value}
-            isLoading={data.isLoading}
-          />
-        ))}
+        <AnalyticsCard
+          title="Total Tasks"
+          value={analytics?.totalTasks || 0}
+          isLoading={analyticsLoading}
+        />
+        <AnalyticsCard
+          title="Completed Tasks"
+          value={analytics?.completedTasks || 0}
+          isLoading={analyticsLoading}
+        />
+        <AnalyticsCard
+          title="Overdue Tasks"
+          value={analytics?.overdueTasks || 0}
+          isLoading={analyticsLoading}
+        />
       </div>
 
       <div className="mt-4">
@@ -112,7 +134,7 @@ const Workspace = () => {
                   className="absolute inset-0"
                 >
                   <TabsContent value="projects" className="mt-0">
-                    <RecentProjects />
+                    <RecentProjects workspaceId={workspaceId!} />
                   </TabsContent>
                 </motion.div>
               )}
@@ -126,7 +148,7 @@ const Workspace = () => {
                   className="absolute inset-0"
                 >
                   <TabsContent value="tasks" className="mt-0">
-                    <RecentTasks />
+                    <RecentTasks workspaceId={workspaceId!} />
                   </TabsContent>
                 </motion.div>
               )}
@@ -140,7 +162,7 @@ const Workspace = () => {
                   className="absolute inset-0"
                 >
                   <TabsContent value="members" className="mt-0">
-                    <RecentMembers />
+                    <RecentMembers workspaceId={workspaceId!} />
                   </TabsContent>
                 </motion.div>
               )}

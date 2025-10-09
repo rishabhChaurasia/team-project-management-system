@@ -1,62 +1,53 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { format } from "date-fns";
-import { Loader, Circle, Clock, CheckCircle, AlertTriangle, Minus, ArrowUp } from "lucide-react";
+import {
+  Circle,
+  Clock,
+  CheckCircle,
+  AlertTriangle,
+  Minus,
+  ArrowUp,
+} from "lucide-react";
 import { motion } from "motion/react";
+import { useGetAllTasksQuery } from "@/redux/rtk-query/taskApi";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo, useCallback } from "react";
 
-const RecentTasks = () => {
-  const isLoading = false;
+type Task = {
+  _id: string;
+  title: string;
+  taskCode: string;
+  status: string;
+  priority: string;
+  dueDate: string;
+  assignedTo: {
+    _id: string;
+    name: string;
+    profilePicture: string | null;
+  };
+};
 
-  // Dummy tasks data
-  const tasks = [
-    {
-      _id: "1",
-      taskCode: "TASK-001",
-      title: "Design homepage layout",
-      dueDate: new Date("2024-02-15"),
-      status: "TODO",
-      priority: "HIGH",
-      assignedTo: {
-        name: "John Doe",
-        profilePicture: "",
-      },
-    },
-    {
-      _id: "2",
-      taskCode: "TASK-002",
-      title: "Implement user authentication",
-      dueDate: new Date("2024-02-20"),
-      status: "IN_PROGRESS",
-      priority: "MEDIUM",
-      assignedTo: {
-        name: "Jane Smith",
-        profilePicture: "",
-      },
-    },
-    {
-      _id: "3",
-      taskCode: "TASK-003",
-      title: "Write API documentation",
-      dueDate: new Date("2024-02-10"),
-      status: "DONE",
-      priority: "LOW",
-      assignedTo: {
-        name: "Mike Johnson",
-        profilePicture: "",
-      },
-    },
-  ];
+const RecentTasks = ({ workspaceId }: { workspaceId: string }) => {
+  const { data, isLoading } = useGetAllTasksQuery({ workspaceId, pageSize: 4 });
 
-  const getAvatarFallbackText = (name: string) => {
+  const tasks = useMemo(() => data?.tasks?.slice(0, 4) || [], [data?.tasks]);
+
+  const getAvatarFallbackText = useCallback((name: string) => {
     return name
       .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase();
-  };
+  }, []);
 
-  const getAvatarColor = (name: string) => {
+  const getAvatarColor = useCallback((name: string) => {
     const colors = [
       "bg-red-500",
       "bg-blue-500",
@@ -66,18 +57,21 @@ const RecentTasks = () => {
     ];
     const index = name.length % colors.length;
     return colors[index];
-  };
+  }, []);
 
-  const transformStatusEnum = (status: string) => {
+  const transformStatusEnum = useCallback((status: string) => {
     return status.replace("_", " ").toLowerCase();
-  };
+  }, []);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "TODO":
+      case "BACKLOG":
         return <Circle className="w-3 h-3" />;
       case "IN_PROGRESS":
         return <Clock className="w-3 h-3" />;
+      case "IN_REVIEW":
+        return <AlertTriangle className="w-3 h-3" />;
       case "DONE":
         return <CheckCircle className="w-3 h-3" />;
       default:
@@ -88,9 +82,12 @@ const RecentTasks = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "TODO":
+      case "BACKLOG":
         return "text-muted-foreground border-border";
       case "IN_PROGRESS":
         return "text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950 dark:border-blue-800";
+      case "IN_REVIEW":
+        return "text-yellow-600 bg-yellow-50 border-yellow-200 dark:text-yellow-400 dark:bg-yellow-950 dark:border-yellow-800";
       case "DONE":
         return "text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950 dark:border-green-800";
       default:
@@ -127,15 +124,28 @@ const RecentTasks = () => {
   return (
     <div className="flex flex-col space-y-6">
       {isLoading ? (
-        <Loader
-          className="w-8 h-8 
-        animate-spin
-        place-self-center flex
-        "
-        />
+        <ul role="list" className="divide-y divide-border">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <li
+              key={index}
+              className="p-3 sm:p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0 sm:justify-between"
+            >
+              <div className="flex flex-col space-y-1 flex-grow min-w-0">
+                <Skeleton className="h-3 w-16" />
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+              <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-2">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-16" />
+                <Skeleton className="h-6 w-6 sm:h-8 sm:w-8 rounded-full" />
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : null}
 
-      {tasks?.length === 0 && (
+      {!isLoading && tasks?.length === 0 && (
         <div
           className="font-semibold
          text-sm text-muted-foreground
@@ -146,7 +156,7 @@ const RecentTasks = () => {
       )}
 
       <ul role="list" className="divide-y divide-border">
-        {tasks.map((task, index) => {
+        {tasks.map((task: Task, index: number) => {
           const name = task?.assignedTo?.name || "";
           const initials = getAvatarFallbackText(name);
           const avatarColor = getAvatarColor(name);
@@ -167,7 +177,10 @@ const RecentTasks = () => {
                   {task.title}
                 </p>
                 <span className="text-xs sm:text-sm text-muted-foreground">
-                  Due: {task.dueDate ? format(task.dueDate, "MMM d") : null}
+                  Due:{" "}
+                  {task.dueDate
+                    ? format(new Date(task.dueDate), "MMM d")
+                    : null}
                 </span>
               </div>
 
@@ -176,7 +189,9 @@ const RecentTasks = () => {
                 {/* Task Status */}
                 <Badge
                   variant="outline"
-                  className={`flex w-auto p-1 px-2 sm:px-3 gap-1 sm:gap-2 font-medium shadow-sm capitalize text-xs sm:text-sm ${getStatusColor(task.status)}`}
+                  className={`flex w-auto p-1 px-2 sm:px-3 gap-1 sm:gap-2 font-medium shadow-sm capitalize text-xs sm:text-sm ${getStatusColor(
+                    task.status
+                  )}`}
                 >
                   {getStatusIcon(task.status)}
                   <span>{transformStatusEnum(task.status)}</span>
@@ -185,7 +200,9 @@ const RecentTasks = () => {
                 {/* Task Priority */}
                 <Badge
                   variant="outline"
-                  className={`flex w-auto p-1 px-2 sm:px-3 gap-1 sm:gap-2 font-medium shadow-sm capitalize text-xs sm:text-sm ${getPriorityColor(task.priority)}`}
+                  className={`flex w-auto p-1 px-2 sm:px-3 gap-1 sm:gap-2 font-medium shadow-sm capitalize text-xs sm:text-sm ${getPriorityColor(
+                    task.priority
+                  )}`}
                 >
                   {getPriorityIcon(task.priority)}
                   <span>{transformStatusEnum(task.priority)}</span>
@@ -207,7 +224,9 @@ const RecentTasks = () => {
                               src={task.assignedTo?.profilePicture || ""}
                               alt={task.assignedTo?.name}
                             />
-                            <AvatarFallback className={`${avatarColor} text-white font-semibold text-xs sm:text-sm`}>
+                            <AvatarFallback
+                              className={`${avatarColor} text-white font-semibold text-xs sm:text-sm`}
+                            >
                               {initials}
                             </AvatarFallback>
                           </Avatar>
@@ -215,7 +234,9 @@ const RecentTasks = () => {
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="font-medium">{task.assignedTo?.name}</p>
-                        <p className="text-xs text-muted-foreground">Assigned to</p>
+                        <p className="text-xs text-muted-foreground">
+                          Assigned to
+                        </p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>

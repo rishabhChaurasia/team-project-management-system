@@ -1,68 +1,80 @@
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Loader } from "lucide-react";
-import { format } from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { motion } from "motion/react";
+import { format } from "date-fns";
+import { useGetAllProjectInWorkspaceQuery } from "@/redux/rtk-query/projectApi";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo, useCallback } from "react";
 
-const RecentProjects = () => {
-  const isPending = false;
-  
-  // Dummy projects data
-  const projects = [
-    {
-      _id: "1",
-      name: "Website Redesign",
-      emoji: "🎨",
-      createdAt: new Date("2024-01-15"),
-      createdBy: {
-        name: "John Doe",
-        profilePicture: ""
-      }
-    },
-    {
-      _id: "2",
-      name: "Mobile App",
-      emoji: "📱",
-      createdAt: new Date("2024-01-10"),
-      createdBy: {
-        name: "Jane Smith",
-        profilePicture: ""
-      }
-    },
-    {
-      _id: "3",
-      name: "Marketing Campaign",
-      emoji: "📈",
-      createdAt: new Date("2024-01-05"),
-      createdBy: {
-        name: "Mike Johnson",
-        profilePicture: ""
-      }
-    }
-  ];
-
-  const getAvatarFallbackText = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+type Project = {
+  _id: string;
+  name: string;
+  emoji: string;
+  createdAt: string;
+  createdBy: {
+    _id: string;
+    name: string;
+    profilePicture: string | null;
   };
+};
 
-  const getAvatarColor = (name: string) => {
-    const colors = ['bg-red-500', 'bg-blue-500', 'bg-green-500', 'bg-yellow-500', 'bg-purple-500'];
+const RecentProjects = ({ workspaceId }: { workspaceId: string }) => {
+  const { data, isLoading: isPending } =
+    useGetAllProjectInWorkspaceQuery(workspaceId);
+
+  const projects = useMemo(
+    () => data?.projects?.slice(0, 5) || [],
+    [data?.projects]
+  );
+
+  const getAvatarFallbackText = useCallback((name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  }, []);
+
+  const getAvatarColor = useCallback((name: string) => {
+    const colors = [
+      "bg-red-500",
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-yellow-500",
+      "bg-purple-500",
+    ];
     const index = name.length % colors.length;
     return colors[index];
-  };
+  }, []);
 
   return (
     <div className="flex flex-col pt-2">
       {isPending ? (
-        <Loader
-          className="w-8 h-8
-         animate-spin
-         place-self-center
-         flex"
-        />
+        <ul role="list" className="space-y-2">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <li key={index} className="py-2">
+              <div className="flex items-start gap-2 sm:gap-3">
+                <Skeleton className="h-6 w-6 rounded" />
+                <div className="flex-1 min-w-0">
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-3 w-20" />
+                </div>
+                <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+                  <Skeleton className="hidden sm:block h-3 w-16" />
+                  <Skeleton className="h-7 w-7 sm:h-9 sm:w-9 rounded-full" />
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : null}
-      {projects?.length === 0 && (
+      {!isPending && projects?.length === 0 && (
         <div
           className="font-semibold
          text-sm text-muted-foreground
@@ -73,7 +85,7 @@ const RecentProjects = () => {
       )}
 
       <ul role="list" className="space-y-2">
-        {projects.map((project, index) => {
+        {projects.map((project: Project, index: number) => {
           const name = project.createdBy.name;
           const initials = getAvatarFallbackText(name);
           const avatarColor = getAvatarColor(name);
@@ -88,11 +100,11 @@ const RecentProjects = () => {
               className="shadow-none cursor-pointer border-0 py-2 rounded-lg transition-colors ease-in-out"
             >
               <Link
-                to={`/workspace/1/project/${project._id}`}
+                to={`/workspace/${workspaceId}/project/${project._id}`}
                 className="block p-0"
               >
                 <div className="flex items-start gap-2 sm:gap-3">
-                  <motion.div 
+                  <motion.div
                     className="text-lg sm:text-xl !leading-[1.4rem] flex-shrink-0"
                     whileHover={{ scale: 1.2, rotate: 10 }}
                     transition={{ type: "spring", stiffness: 300 }}
@@ -105,12 +117,14 @@ const RecentProjects = () => {
                     </p>
                     <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                       {project.createdAt
-                        ? format(project.createdAt, "MMM d, yyyy")
+                        ? format(new Date(project.createdAt), "MMM d, yyyy")
                         : null}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                    <span className="hidden sm:inline text-sm text-muted-foreground">Created by</span>
+                    <span className="hidden sm:inline text-sm text-muted-foreground">
+                      Created by
+                    </span>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -125,15 +139,21 @@ const RecentProjects = () => {
                                 src={project.createdBy.profilePicture || ""}
                                 alt="Avatar"
                               />
-                              <AvatarFallback className={`${avatarColor} text-white font-semibold text-xs sm:text-sm`}>
+                              <AvatarFallback
+                                className={`${avatarColor} text-white font-semibold text-xs sm:text-sm`}
+                              >
                                 {initials}
                               </AvatarFallback>
                             </Avatar>
                           </motion.div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p className="font-medium">{project.createdBy.name}</p>
-                          <p className="text-xs text-muted-foreground">Project creator</p>
+                          <p className="font-medium">
+                            {project.createdBy.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Project creator
+                          </p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

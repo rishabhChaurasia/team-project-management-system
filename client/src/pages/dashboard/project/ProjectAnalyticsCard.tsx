@@ -52,17 +52,22 @@ const ProjectAnalyticsCard = (props: {
             </CardTitle>
             {!isLoading && (
               <motion.div
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.4, type: "spring", stiffness: 300 }}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               >
                 {getArrowIcon()}
               </motion.div>
             )}
           </div>
-          <div className="p-1.5 rounded-full bg-muted/50 group-hover:bg-primary/10 transition-colors">
+          <motion.div
+            className="p-1.5 rounded-full bg-muted/50 group-hover:bg-primary/10 transition-colors"
+            initial={{ rotate: 0 }}
+            animate={{ rotate: 360 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
+          >
             <Activity className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
-          </div>
+          </motion.div>
         </CardHeader>
         <CardContent className="pt-0">
           <motion.div

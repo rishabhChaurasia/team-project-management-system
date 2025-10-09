@@ -7,65 +7,42 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { format } from "date-fns";
-import { Loader, User } from "lucide-react";
+import { User } from "lucide-react";
 import { motion } from "motion/react";
+import { useGetWorkspaceMembersQuery } from "@/redux/rtk-query/workspaceApi";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useMemo, useCallback } from "react";
 
-const RecentMembers = () => {
-  const isPending = false;
+type Member = {
+  _id: string;
+  userId: {
+    _id: string;
+    name: string;
+    email: string;
+    profilePicture: string | null;
+  };
+  role: {
+    _id: string;
+    name: string;
+  };
+  joinedAt: string;
+};
 
-  // Dummy members data
-  const members = [
-    {
-      userId: {
-        name: "John Doe",
-        profilePicture: "",
-      },
-      role: {
-        name: "Admin",
-      },
-      joinedAt: new Date("2024-01-15"),
-    },
-    {
-      userId: {
-        name: "Jane Smith",
-        profilePicture: "",
-      },
-      role: {
-        name: "Developer",
-      },
-      joinedAt: new Date("2024-01-20"),
-    },
-    {
-      userId: {
-        name: "Mike Johnson",
-        profilePicture: "",
-      },
-      role: {
-        name: "Designer",
-      },
-      joinedAt: new Date("2024-01-25"),
-    },
-    {
-      userId: {
-        name: "Sarah Wilson",
-        profilePicture: "",
-      },
-      role: {
-        name: "Manager",
-      },
-      joinedAt: new Date("2024-01-10"),
-    },
-  ];
+const RecentMembers = ({ workspaceId }: { workspaceId: string }) => {
+  const { data, isLoading: isPending } =
+    useGetWorkspaceMembersQuery(workspaceId);
 
-  const getAvatarFallbackText = (name: string) => {
+  const members = useMemo(() => data?.members || [], [data?.members]);
+
+  const getAvatarFallbackText = useCallback((name: string) => {
     return name
       .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase();
-  };
+  }, []);
 
-  const getAvatarColor = (name: string) => {
+  const getAvatarColor = useCallback((name: string) => {
     const colors = [
       "bg-red-500",
       "bg-blue-500",
@@ -75,41 +52,54 @@ const RecentMembers = () => {
     ];
     const index = name.length % colors.length;
     return colors[index];
-  };
+  }, []);
 
-  const getRoleColor = (role: string) => {
-    switch (role.toLowerCase()) {
-      case "admin":
-        return "text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950 dark:border-red-800";
-      case "manager":
+  const getRoleColor = useCallback((role: string) => {
+    switch (role.toUpperCase()) {
+      case "OWNER":
         return "text-purple-600 bg-purple-50 border-purple-200 dark:text-purple-400 dark:bg-purple-950 dark:border-purple-800";
-      case "developer":
+      case "ADMIN":
+        return "text-red-600 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-950 dark:border-red-800";
+      case "MEMBER":
         return "text-blue-600 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-950 dark:border-blue-800";
-      case "designer":
-        return "text-green-600 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-950 dark:border-green-800";
       default:
         return "text-muted-foreground border-border";
     }
-  };
+  }, []);
 
   return (
     <div className="flex flex-col pt-2">
       {isPending ? (
-        <Loader
-          className="w-8 h-8 
-        animate-spin
-        place-self-center flex"
-        />
+        <ul role="list" className="space-y-2 sm:space-y-3">
+          {Array.from({ length: 3 }).map((_, index) => (
+            <li
+              key={index}
+              className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 rounded-lg border border-border"
+            >
+              <div className="flex items-center gap-3 sm:gap-4 flex-grow">
+                <Skeleton className="h-8 w-8 sm:h-9 sm:w-9 rounded-full" />
+                <div className="flex-1 min-w-0">
+                  <Skeleton className="h-4 w-32 mb-2" />
+                  <Skeleton className="h-5 w-16" />
+                </div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <Skeleton className="h-3 w-12 mb-1" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </li>
+          ))}
+        </ul>
       ) : null}
 
       <ul role="list" className="space-y-2 sm:space-y-3">
-        {members.map((member, index) => {
+        {members.map((member: Member, index: number) => {
           const name = member?.userId?.name || "";
           const initials = getAvatarFallbackText(name);
           const avatarColor = getAvatarColor(name);
           return (
             <motion.li
-              key={index}
+              key={member._id}
               role="listitem"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -175,7 +165,12 @@ const RecentMembers = () => {
               <div className="text-xs sm:text-sm text-muted-foreground text-right flex-shrink-0">
                 <p className="font-medium">Joined</p>
                 <p>
-                  {member.joinedAt ? format(member.joinedAt, window.innerWidth >= 640 ? "PPP" : "MMM d") : null}
+                  {member.joinedAt
+                    ? format(
+                        new Date(member.joinedAt),
+                        window.innerWidth >= 640 ? "PPP" : "MMM d"
+                      )
+                    : null}
                 </p>
               </div>
             </motion.li>
