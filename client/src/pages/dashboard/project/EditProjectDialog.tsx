@@ -1,8 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Edit3, Loader, CheckCircle2 } from "lucide-react";
+import { useUpdateProjectMutation } from "@/redux/rtk-query/projectApi";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Dialog,
@@ -83,46 +86,62 @@ export default EditProjectDialog;
 
 function EditProjectForm(props: { project: ProjectType; onClose: () => void }) {
   const { project, onClose } = props;
+  const { workspaceId } = useParams();
 
   const [emoji, setEmoji] = useState("📊");
-  const [isPending, setIsPending] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
 
-  const formSchema = z.object({
+  const [updateProject, { isLoading: isPending }] = useUpdateProjectMutation();
+
+  const formSchema = useMemo(() => z.object({
     name: z.string().trim().min(1, {
       message: "Project title is required",
     }),
     description: z.string().trim(),
-  });
+  }), []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      description: "",
+      name: project?.name || "",
+      description: project?.description || "",
     },
   });
 
   useEffect(() => {
-    setEmoji(project?.emoji || "📊");
-    form.setValue("name", project?.name || "");
-    form.setValue("description", project?.description || "");
-  }, [form, project]);
+    if (project) {
+      setEmoji(project.emoji);
+      form.reset({
+        name: project.name,
+        description: project.description,
+      });
+    }
+  }, [project, form]);
 
-  const handleEmojiSelection = (selectedEmoji: string) => {
+  const handleEmojiSelection = useCallback((selectedEmoji: string) => {
     setEmoji(selectedEmoji);
     setIsEmojiPickerOpen(false);
-  };
+  }, []);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsPending(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Update project:", { emoji, ...values });
-    setIsPending(false);
-    onClose();
-  };
+  const onSubmit = useCallback(async (values: z.infer<typeof formSchema>) => {
+    try {
+      await updateProject({
+        id: project._id,
+        workspaceId: workspaceId!,
+        project: {
+          emoji,
+          name: values.name,
+          description: values.description,
+        },
+      }).unwrap();
+      toast.success("Project updated successfully");
+      onClose();
+    } catch (error: any) {
+      const errorMessage = error?.data?.message || "Failed to update project";
+      toast.error(errorMessage);
+    }
+  }, [updateProject, project._id, workspaceId, emoji, onClose]);
 
   // Simple emoji picker component
   const EmojiPicker = () => {
@@ -215,11 +234,6 @@ function EditProjectForm(props: { project: ProjectType; onClose: () => void }) {
                       placeholder="Enter project name"
                       className="h-10 sm:h-[48px] transition-colors"
                       {...field}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        if (errors.name)
-                          setErrors((prev) => ({ ...prev, name: "" }));
-                      }}
                     />
                   </FormControl>
                   <AnimatePresence>

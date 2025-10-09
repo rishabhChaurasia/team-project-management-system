@@ -72,20 +72,25 @@ const ProjectAnalyticsCard = (props: {
             transition={{ delay: 0.2, duration: 0.4 }}
           >
             {isLoading ? (
-              <div className="flex items-center gap-2">
-                <Loader className="w-5 h-5 animate-spin text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  Loading...
-                </span>
-              </div>
+              <Loader className="w-6 h-6 animate-spin text-muted-foreground" />
             ) : (
               <>
-                <span className="text-2xl font-bold tracking-tight">
+                <motion.span
+                  className="text-2xl font-bold tracking-tight"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                >
                   {value}
-                </span>
-                <span className="text-xs text-muted-foreground font-medium">
+                </motion.span>
+                <motion.span
+                  className="text-xs text-muted-foreground font-medium"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                >
                   {title.toLowerCase().includes("task") ? "tasks" : "items"}
-                </span>
+                </motion.span>
               </>
             )}
           </motion.div>
