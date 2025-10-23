@@ -10,6 +10,7 @@ import {
   Plus,
   Folder,
   Trash2,
+  Lock,
 } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
@@ -17,7 +18,7 @@ import {
   useGetCurrentUserQuery,
   useLogoutUserMutation,
 } from "@/redux/rtk-query/authApi";
-import { useGetAllMyWorkspaceQuery } from "@/redux/rtk-query/workspaceApi";
+import { useGetAllMyWorkspaceQuery, useGetWorkspaceMembersQuery } from "@/redux/rtk-query/workspaceApi";
 import { useGetAllProjectInWorkspaceQuery } from "@/redux/rtk-query/projectApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -75,11 +76,21 @@ const AppSidebar = () => {
     useGetAllProjectInWorkspaceQuery(workspaceId, {
       skip: !workspaceId,
     });
+  const { data: membersData } = useGetWorkspaceMembersQuery(workspaceId!, {
+    skip: !workspaceId,
+  });
 
   const currentWorkspace =
     workspacesData?.workspaces?.find(
       (workspace: any) => workspace._id === workspaceId
     ) || data?.user?.currentWorkspace;
+  
+  const members = membersData?.members || [];
+  const currentUser = members.find(
+    (member: any) => member.userId._id === data?.user?._id
+  );
+  const canAccessSettings =
+    currentUser?.role.name === "OWNER" || currentUser?.role.name === "ADMIN";
   const [logoutUser, { isLoading: isLoggingOut }] = useLogoutUserMutation();
   const [isLogoutOpen, setIsLogoutOpen] = useState(false);
   const [isCreateWorkspaceOpen, setIsCreateWorkspaceOpen] = useState(false);
@@ -310,6 +321,9 @@ const AppSidebar = () => {
               <SidebarMenu>
                 {items.map((item, index) => {
                   const Icon = item.icon;
+                  const isSettings = item.title === "Settings";
+                  const isDisabled = isSettings && !canAccessSettings;
+                  
                   return (
                     <motion.div
                       key={item.title}
@@ -318,15 +332,26 @@ const AppSidebar = () => {
                       transition={{ delay: 0.3 + index * 0.1, duration: 0.4 }}
                     >
                       <SidebarMenuItem>
-                        <SidebarMenuButton
-                          asChild
-                          className="hover:bg-sidebar-accent/50 transition-colors"
-                        >
-                          <Link to={item.url}>
+                        {isDisabled ? (
+                          <SidebarMenuButton
+                            className="opacity-50 cursor-not-allowed"
+                            disabled
+                          >
                             <Icon size={20} />
                             {item.title}
-                          </Link>
-                        </SidebarMenuButton>
+                            <Lock size={16} className="ml-auto" />
+                          </SidebarMenuButton>
+                        ) : (
+                          <SidebarMenuButton
+                            asChild
+                            className="hover:bg-sidebar-accent/50 transition-colors"
+                          >
+                            <Link to={item.url}>
+                              <Icon size={20} />
+                              {item.title}
+                            </Link>
+                          </SidebarMenuButton>
+                        )}
                       </SidebarMenuItem>
                     </motion.div>
                   );

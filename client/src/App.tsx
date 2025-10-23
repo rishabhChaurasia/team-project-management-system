@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "./components/ui/sonner";
 import { Progress } from "./components/ui/progress";
 import {
@@ -16,6 +16,7 @@ import {
   Workspace,
 } from "./pages";
 import DashboardLayout from "./layout/DashboardLayout";
+import AuthLayout from "./layout/AuthLayout";
 
 const App = () => {
   return (
@@ -29,11 +30,17 @@ const App = () => {
       }
     >
       <Routes>
-        <Route path="/sign-in" element={<Login />} />
-        <Route path="/sign-up" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/google/oauth/callback" element={<GoogleOauthFailure />} />
+        <Route element={<AuthLayout />}>
+          <Route index path="/" element={<Navigate to={"/sign-in"} />} />
+          <Route path="/sign-in" element={<Login />} />
+          <Route path="/sign-up" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route
+            path="/google/oauth/callback"
+            element={<GoogleOauthFailure />}
+          />
+        </Route>
 
         <Route element={<DashboardLayout />}>
           <Route path="/workspace/:workspaceId" element={<Workspace />} />

@@ -1,7 +1,7 @@
 import WorkspaceHeader from "./workspace/WorkspaceHeader";
 import EditWorkspaceForm from "./workspace/EditWorkspaceForm";
 import DeleteWorkspaceCard from "./workspace/DeleteWorkspaceCard";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 import {
   useGetWorkspaceByIdQuery,
   useGetWorkspaceMembersQuery,
@@ -27,6 +27,15 @@ const Settings = () => {
   const canDeleteWorkspace = currentUser?.role.name === "OWNER";
 
   const showEditFormLoading = membersLoading || !currentUser;
+
+  if (!membersLoading && currentUser && !canEditWorkspace) {
+    return (
+      <Navigate
+        to={`/workspace/${currentUserData?.user?.currentWorkspace?._id}`}
+        replace
+      />
+    );
+  }
 
   return (
     <div className="w-full h-auto py-2 px-4 sm:px-6 lg:px-8">
