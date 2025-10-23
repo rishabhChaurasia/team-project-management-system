@@ -8,6 +8,7 @@ import {
   JoinWorkspace,
   Login,
   Members,
+  NotFound,
   ProjectDetails,
   Register,
   ResetPassword,
@@ -59,6 +60,8 @@ const App = () => {
             element={<JoinWorkspace />}
           />
         </Route>
+        
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
     </Suspense>

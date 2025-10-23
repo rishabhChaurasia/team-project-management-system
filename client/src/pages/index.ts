@@ -18,3 +18,4 @@ export const ProjectDetails = lazy(
   () => import("./dashboard/project/ProjectDetails")
 );
 export const JoinWorkspace = lazy(() => import("./invite/JoinWorkspace"));
+export const NotFound = lazy(() => import("./NotFound"));
