@@ -1,240 +1,409 @@
-# Team Project Management System
+<div align="center">
 
-A full-stack project management application built with React, TypeScript, Node.js, Express, and MongoDB. This system enables teams to collaborate on projects, manage tasks, and organize workspaces efficiently.
+# 🚀 Team Project Management System
 
-## Features
+### *Where Teams Transform Chaos into Clarity*
 
-- **Workspace Management**: Create and manage multiple workspaces with invite-based member access
-- **Project Organization**: Create projects within workspaces with emoji icons and descriptions
-- **Task Management**: Full CRUD operations for tasks with status tracking, priority levels, and assignments
-- **Team Collaboration**: Invite members to workspaces, assign tasks, and manage team roles
-- **Authentication**: Secure authentication with local and Google OAuth strategies
-- **Role-Based Access Control**: Granular permissions for workspace owners and members
-- **Real-time Updates**: Redux Toolkit Query for efficient state management and caching
-- **Responsive UI**: Modern, accessible interface built with Radix UI and Tailwind CSS
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)](https://expressjs.com/)
 
-## Tech Stack
+*A modern, full-stack project management platform that empowers teams to collaborate seamlessly, track progress effortlessly, and deliver results consistently.*
 
-### Frontend
-- **React 19** with TypeScript
-- **Vite** for fast development and building
-- **Redux Toolkit** with RTK Query for state management
-- **React Router** for navigation
-- **Radix UI** for accessible component primitives
-- **Tailwind CSS** for styling
-- **React Hook Form** with Zod validation
-- **Lucide React** for icons
+[Features](#-features) • [Quick Start](#-quick-start) • [Tech Stack](#-tech-stack) • [API Docs](#-api-reference) • [Contributing](#-contributing)
 
-### Backend
-- **Node.js** with Express
-- **TypeScript** for type safety
-- **MongoDB** with Mongoose ODM
-- **Passport.js** for authentication (Local & Google OAuth)
-- **Express Session** for session management
-- **Nodemailer** for email notifications
-- **Zod** for validation
-- **Bcrypt** for password hashing
+</div>
 
-## Project Structure
+---
+
+## 🎯 What Makes This Special?
+
+Tired of juggling multiple tools? This isn't just another project management app—it's your team's command center. Built with cutting-edge technologies and designed for real-world workflows.
+
+```
+📊 Workspaces → 🎨 Projects → ✅ Tasks → 🎉 Success
+```
+
+## ✨ Features
+
+<table>
+<tr>
+<td width="50%">
+
+### 🏢 Workspace Management
+- 🔐 **Secure Invite System** - Unique codes for each workspace
+- 👑 **Owner Controls** - Full administrative power
+- 🤝 **Team Collaboration** - Seamless member coordination
+- 🔄 **Multi-Workspace** - Manage unlimited workspaces
+
+</td>
+<td width="50%">
+
+### 📋 Smart Task Management
+- 🏷️ **Unique Task Codes** - Easy reference & tracking
+- 📊 **Status Pipeline** - TODO → IN_PROGRESS → IN_REVIEW → DONE
+- 🎯 **Priority Levels** - LOW, MEDIUM, HIGH, URGENT
+- 📅 **Due Date Tracking** - Never miss a deadline
+
+</td>
+</tr>
+<tr>
+<td width="50%">
+
+### 🎨 Project Organization
+- 😊 **Emoji Icons** - Visual project identification
+- 📝 **Rich Descriptions** - Context at a glance
+- 🗂️ **Workspace Grouping** - Organized hierarchy
+- ⚡ **Quick Actions** - CRUD operations made easy
+
+</td>
+<td width="50%">
+
+### 🔐 Authentication & Security
+- 🔑 **Local Auth** - Email/password login
+- 🌐 **Google OAuth** - One-click sign-in
+- 🔒 **Session Management** - Secure cookie-based auth
+- 📧 **Password Reset** - Email-based recovery
+
+</td>
+</tr>
+</table>
+
+### 🎨 Modern UI/UX
+- 🌓 **Dark/Light Mode** - Easy on the eyes
+- 📱 **Fully Responsive** - Works on all devices
+- ♿ **Accessible** - Built with Radix UI primitives
+- ⚡ **Lightning Fast** - Optimized with RTK Query caching
+
+---
+
+## 🛠️ Tech Stack
+
+<div align="center">
+
+### Frontend Arsenal
+
+| Technology | Purpose | Why We Love It |
+|------------|---------|----------------|
+| ⚛️ **React 19** | UI Framework | Latest features, best performance |
+| 📘 **TypeScript** | Type Safety | Catch bugs before they happen |
+| ⚡ **Vite** | Build Tool | Lightning-fast HMR |
+| 🔄 **Redux Toolkit** | State Management | Predictable state with RTK Query |
+| 🎨 **Tailwind CSS** | Styling | Utility-first, highly customizable |
+| 🧩 **Radix UI** | Components | Accessible, unstyled primitives |
+| 🎯 **React Hook Form** | Forms | Performant form validation |
+| ✅ **Zod** | Validation | Type-safe schema validation |
+
+### Backend Powerhouse
+
+| Technology | Purpose | Why We Love It |
+|------------|---------|----------------|
+| 🟢 **Node.js** | Runtime | JavaScript everywhere |
+| 🚂 **Express** | Web Framework | Fast, minimalist, battle-tested |
+| 🍃 **MongoDB** | Database | Flexible, scalable NoSQL |
+| 🔐 **Passport.js** | Authentication | Multiple strategies support |
+| 📧 **Nodemailer** | Email Service | Reliable email delivery |
+| 🔒 **Bcrypt** | Password Hashing | Industry-standard security |
+
+</div>
+
+---
+
+## 📁 Project Architecture
 
 ```
 team-project-management-system/
-├── client/                 # Frontend application
+│
+├── 🎨 client/                    # Frontend Magic
 │   ├── src/
-│   │   ├── components/    # Reusable UI components
-│   │   ├── hooks/         # Custom React hooks
-│   │   ├── layout/        # Layout components
-│   │   ├── lib/           # Utility functions
-│   │   ├── pages/         # Page components
-│   │   ├── redux/         # Redux store and API slices
-│   │   └── types/         # TypeScript type definitions
+│   │   ├── components/          # 🧩 Reusable UI components
+│   │   │   └── ui/              # 🎭 Radix UI components
+│   │   ├── pages/               # 📄 Route pages
+│   │   │   ├── auth/            # 🔐 Authentication pages
+│   │   │   ├── dashboard/       # 📊 Main app pages
+│   │   │   └── invite/          # 📨 Workspace invites
+│   │   ├── redux/               # 🔄 State management
+│   │   │   ├── rtk-query/       # 🌐 API endpoints
+│   │   │   └── slices/          # 📦 Redux slices
+│   │   ├── layout/              # 🏗️ Layout components
+│   │   ├── hooks/               # 🪝 Custom React hooks
+│   │   ├── lib/                 # 🛠️ Utilities
+│   │   └── types/               # 📘 TypeScript types
 │   └── package.json
 │
-└── server/                # Backend application
+└── 🔧 server/                    # Backend Power
     ├── src/
-    │   ├── config/        # Configuration files
-    │   ├── controllers/   # Route controllers
-    │   ├── enums/         # Enumerations
-    │   ├── middlewares/   # Express middlewares
-    │   ├── models/        # Mongoose models
-    │   ├── routes/        # API routes
-    │   ├── seeders/       # Database seeders
-    │   ├── services/      # Business logic
-    │   ├── utils/         # Utility functions
-    │   └── validation/    # Request validation schemas
+    │   ├── config/              # ⚙️ App configuration
+    │   ├── controllers/         # 🎮 Request handlers
+    │   ├── services/            # 💼 Business logic
+    │   ├── models/              # 📊 Database schemas
+    │   ├── routes/              # 🛣️ API routes
+    │   ├── middlewares/         # 🔀 Express middlewares
+    │   ├── validation/          # ✅ Request validation
+    │   ├── utils/               # 🛠️ Helper functions
+    │   ├── enums/               # 📋 Enumerations
+    │   └── seeders/             # 🌱 Database seeders
     └── package.json
 ```
 
-## Getting Started
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- MongoDB (local or Atlas)
-- npm or yarn
 
-### Installation
+```bash
+✅ Node.js v18+
+✅ MongoDB (local or Atlas)
+✅ npm or yarn
+✅ A cup of coffee ☕
+```
 
-1. **Clone the repository**
+### ⚡ Lightning Setup
+
+**1️⃣ Clone & Navigate**
 ```bash
 git clone <repository-url>
 cd team-project-management-system
 ```
 
-2. **Install dependencies**
-
-Frontend:
+**2️⃣ Install Dependencies**
 ```bash
-cd client
-npm install
+# Frontend
+cd client && npm install
+
+# Backend
+cd ../server && npm install
 ```
 
-Backend:
-```bash
-cd server
-npm install
-```
+**3️⃣ Environment Setup**
 
-3. **Environment Configuration**
-
-Create `.env` file in the `server` directory:
+Create `server/.env`:
 ```env
+# 🌍 Server Config
 NODE_ENV=development
 PORT=5000
-MONGO_URI=mongodb://localhost:27017/project-management
-SESSION_SECRET=your-session-secret
-FRONTEND_ORIGIN=http://localhost:5173
 BASE_PATH=/api/v1
+FRONTEND_ORIGIN=http://localhost:5173
 
-# Google OAuth
+# 🗄️ Database
+MONGO_URI=mongodb://localhost:27017/project-management
+
+# 🔐 Security
+SESSION_SECRET=your-super-secret-session-key
+
+# 🌐 Google OAuth
 GOOGLE_CLIENT_ID=your-google-client-id
 GOOGLE_CLIENT_SECRET=your-google-client-secret
 GOOGLE_CALLBACK_URL=http://localhost:5000/api/v1/auth/google/callback
 
-# Email Configuration
+# 📧 Email Service
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
-EMAIL_PASSWORD=your-email-password
+EMAIL_PASSWORD=your-app-password
 ```
 
-Create `.env` file in the `client` directory:
+Create `client/.env`:
 ```env
 VITE_API_URL=http://localhost:5000/api/v1
 ```
 
-4. **Seed the database**
+**4️⃣ Seed Database**
 ```bash
 cd server
 npm run seed
 ```
 
-5. **Run the application**
+**5️⃣ Launch 🚀**
 
-Backend:
 ```bash
-cd server
-npm run dev
+# Terminal 1 - Backend
+cd server && npm run dev
+
+# Terminal 2 - Frontend
+cd client && npm run dev
 ```
 
-Frontend:
-```bash
-cd client
-npm run dev
+**6️⃣ Open & Enjoy**
+- 🎨 Frontend: http://localhost:5173
+- 🔧 Backend: http://localhost:5000
+
+---
+
+## 📡 API Reference
+
+### 🔐 Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/auth/register` | 📝 Create new account |
+| `POST` | `/api/v1/auth/login` | 🔓 Sign in |
+| `POST` | `/api/v1/auth/logout` | 👋 Sign out |
+| `POST` | `/api/v1/auth/forgot-password` | 🔑 Request password reset |
+| `POST` | `/api/v1/auth/reset-password` | 🔄 Reset password |
+| `GET` | `/api/v1/auth/google` | 🌐 Google OAuth login |
+| `GET` | `/api/v1/auth/google/callback` | ↩️ OAuth callback |
+
+### 👤 User Management
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/v1/user/profile` | 👁️ Get user profile |
+| `PUT` | `/api/v1/user/profile` | ✏️ Update profile |
+
+### 🏢 Workspaces
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/workspace` | ➕ Create workspace |
+| `GET` | `/api/v1/workspace` | 📋 List all workspaces |
+| `GET` | `/api/v1/workspace/:id` | 🔍 Get workspace details |
+| `PUT` | `/api/v1/workspace/:id` | ✏️ Update workspace |
+| `DELETE` | `/api/v1/workspace/:id` | 🗑️ Delete workspace |
+| `POST` | `/api/v1/workspace/:id/reset-invite` | 🔄 Reset invite code |
+
+### 👥 Members
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/member/invite` | 📨 Invite member |
+| `GET` | `/api/v1/member/workspace/:workspaceId` | 👥 List members |
+| `DELETE` | `/api/v1/member/:id` | ❌ Remove member |
+
+### 🎨 Projects
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/project` | ➕ Create project |
+| `GET` | `/api/v1/project/workspace/:workspaceId` | 📋 List projects |
+| `GET` | `/api/v1/project/:id` | 🔍 Get project details |
+| `PUT` | `/api/v1/project/:id` | ✏️ Update project |
+| `DELETE` | `/api/v1/project/:id` | 🗑️ Delete project |
+
+### ✅ Tasks
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/task` | ➕ Create task |
+| `GET` | `/api/v1/task/workspace/:workspaceId` | 📋 List workspace tasks |
+| `GET` | `/api/v1/task/project/:projectId` | 📋 List project tasks |
+| `GET` | `/api/v1/task/:id` | 🔍 Get task details |
+| `PUT` | `/api/v1/task/:id` | ✏️ Update task |
+| `DELETE` | `/api/v1/task/:id` | 🗑️ Delete task |
+
+---
+
+## 🎓 How It Works
+
+### 🏢 Workspace Flow
+```
+1. Create Workspace → 2. Get Invite Code → 3. Share with Team → 4. Collaborate!
 ```
 
-The application will be available at:
-- Frontend: http://localhost:5173
-- Backend: http://localhost:5000
+Each workspace is an isolated environment with:
+- 🔐 Unique invite code for secure onboarding
+- 👑 Owner with full administrative rights
+- 👥 Members with collaboration permissions
+- 🎨 Multiple projects and tasks
 
-## API Endpoints
+### 📋 Task Lifecycle
+```
+TODO → IN_PROGRESS → IN_REVIEW → DONE
+```
 
-### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login user
-- `POST /api/v1/auth/logout` - Logout user
-- `POST /api/v1/auth/forgot-password` - Request password reset
-- `POST /api/v1/auth/reset-password` - Reset password
-- `GET /api/v1/auth/google` - Google OAuth login
-- `GET /api/v1/auth/google/callback` - Google OAuth callback
+Tasks support:
+- 🏷️ Auto-generated unique codes (e.g., `TASK-1234`)
+- 🎯 Four priority levels (LOW, MEDIUM, HIGH, URGENT)
+- 👤 Assignment to team members
+- 📅 Due date tracking
+- 📝 Rich descriptions
 
-### User
-- `GET /api/v1/user/profile` - Get user profile
-- `PUT /api/v1/user/profile` - Update user profile
+### 🔐 Authentication Strategy
+```
+Local Auth ←→ Session Management ←→ Google OAuth
+```
 
-### Workspace
-- `POST /api/v1/workspace` - Create workspace
-- `GET /api/v1/workspace` - Get all workspaces
-- `GET /api/v1/workspace/:id` - Get workspace by ID
-- `PUT /api/v1/workspace/:id` - Update workspace
-- `DELETE /api/v1/workspace/:id` - Delete workspace
-- `POST /api/v1/workspace/:id/reset-invite` - Reset invite code
+- 🔒 Bcrypt-hashed passwords
+- 🍪 Secure HTTP-only cookies
+- ⏱️ 24-hour session duration
+- 📧 Email-based password recovery
 
-### Members
-- `POST /api/v1/member/invite` - Invite member to workspace
-- `GET /api/v1/member/workspace/:workspaceId` - Get workspace members
-- `DELETE /api/v1/member/:id` - Remove member
+---
 
-### Projects
-- `POST /api/v1/project` - Create project
-- `GET /api/v1/project/workspace/:workspaceId` - Get workspace projects
-- `GET /api/v1/project/:id` - Get project by ID
-- `PUT /api/v1/project/:id` - Update project
-- `DELETE /api/v1/project/:id` - Delete project
+## 🎯 Available Scripts
 
-### Tasks
-- `POST /api/v1/task` - Create task
-- `GET /api/v1/task/workspace/:workspaceId` - Get workspace tasks
-- `GET /api/v1/task/project/:projectId` - Get project tasks
-- `GET /api/v1/task/:id` - Get task by ID
-- `PUT /api/v1/task/:id` - Update task
-- `DELETE /api/v1/task/:id` - Delete task
+### 🎨 Client Commands
 
-## Key Features Explained
+```bash
+npm run dev      # 🚀 Start dev server (Vite HMR)
+npm run build    # 📦 Production build
+npm run preview  # 👀 Preview production build
+npm run lint     # 🔍 Run ESLint
+```
 
-### Workspace System
-- Each workspace has a unique invite code for member onboarding
-- Workspace owners have full control over settings and members
-- Members can collaborate on projects and tasks within the workspace
+### 🔧 Server Commands
 
-### Task Management
-- Tasks have unique codes for easy reference
-- Support for multiple statuses: TODO, IN_PROGRESS, IN_REVIEW, DONE
-- Priority levels: LOW, MEDIUM, HIGH, URGENT
-- Task assignment to team members
-- Due date tracking
+```bash
+npm run dev      # 🚀 Start dev server (hot reload)
+npm run build    # 📦 Compile TypeScript
+npm start        # 🏭 Start production server
+npm run seed     # 🌱 Seed database with roles
+```
 
-### Authentication Flow
-- Local authentication with email/password
-- Google OAuth integration
-- Password reset via email
-- Session-based authentication with secure cookies
+---
 
-## Scripts
+## 🤝 Contributing
 
-### Client
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+We love contributions! Here's how to get started:
 
-### Server
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build TypeScript to JavaScript
-- `npm start` - Start production server
-- `npm run seed` - Seed database with initial data
+```bash
+# 1️⃣ Fork the repo
+# 2️⃣ Create your feature branch
+git checkout -b feature/amazing-feature
 
-## Contributing
+# 3️⃣ Commit your changes
+git commit -m '✨ Add amazing feature'
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+# 4️⃣ Push to the branch
+git push origin feature/amazing-feature
 
-## License
+# 5️⃣ Open a Pull Request
+```
 
-This project is licensed under the ISC License.
+### 📝 Commit Convention
+- ✨ `feat:` New feature
+- 🐛 `fix:` Bug fix
+- 📚 `docs:` Documentation
+- 💄 `style:` Formatting
+- ♻️ `refactor:` Code restructuring
+- ⚡ `perf:` Performance improvements
+- ✅ `test:` Adding tests
 
-## Support
+---
 
-For support, email support@example.com or open an issue in the repository.
+## 📄 License
+
+This project is licensed under the **ISC License** - see the LICENSE file for details.
+
+---
+
+## 💬 Support & Community
+
+<div align="center">
+
+**Need Help?**
+
+📧 Email: support@example.com  
+🐛 Issues: [GitHub Issues](https://github.com/your-repo/issues)  
+💬 Discussions: [GitHub Discussions](https://github.com/your-repo/discussions)
+
+---
+
+### ⭐ If you find this project useful, give it a star!
+
+**Built with ❤️ by developers, for developers**
+
+</div>
